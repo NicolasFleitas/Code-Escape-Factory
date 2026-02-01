@@ -1,1 +1,4 @@
-# ARCHIVO PRINCIPAL DEL BUCLE DEL JUEGO
+from src.engine import main
+
+if __name__ == "__main__":
+    main()
