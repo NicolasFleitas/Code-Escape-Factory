@@ -52,8 +52,9 @@ class Game:
 
             if self.game_state == "EXPLORANDO":
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-                    if self.pc_terminal.is_player_near(self.player.rect):
-                        self.game_state = "PROGRAMANDO"
+                    # CARGAMOS EL PUZZLE SEGÚN EL ID DE LA TERMINAL
+                    self.puzzle.set_puzzle(self.pc_terminal.task_id)
+                    self.game_state = "PROGRAMANDO"
 
             elif self.game_state == "PROGRAMANDO":
                 result = self.puzzle.handle_event(event)

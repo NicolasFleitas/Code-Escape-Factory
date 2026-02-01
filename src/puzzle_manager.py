@@ -1,13 +1,24 @@
 import pygame
 from src.settings import COLOR_SUCCESS, COLOR_TEXTO
+from src.puzzles import CATALOGO_PUZZLES  # Importamos el catálogo
 
 
 class PuzzleManager:
     def __init__(self):
         self.input_text = ""
-        self.target_code = "puerta = True"
+        self.target_code = ""
+        self.instruction = ""
         self.is_solved = False
         self.font = pygame.font.SysFont("monospace", 24)
+
+    def set_puzzle(self, task_id):
+        """Carga los datos de un puzzle específico del catálogo"""
+        puzzle_data = CATALOGO_PUZZLES.get(task_id)
+        if puzzle_data:
+            self.instruction = puzzle_data["instruccion"]
+            self.target_code = puzzle_data["solucion"]
+            self.input_text = ""
+            self.is_solved = False
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -24,10 +35,8 @@ class PuzzleManager:
         return None
 
     def draw(self, surface):
-        # Dibujar instrucciones y código
-        instr = self.font.render(
-            "# BUG: La puerta esta cerrada (False). Corrigelo:", True, (150, 150, 150)
-        )
+        # Dibujar instrucción cargada dinámicamente
+        instr = self.font.render(self.instruction, True, (150, 150, 150))
         surface.blit(instr, (100, 200))
 
         # Dibujar lo que el usuario escribe
