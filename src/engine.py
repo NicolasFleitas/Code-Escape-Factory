@@ -13,6 +13,7 @@ from src.settings import (
 from src.player import Player
 from src.terminal import Terminal
 from src.puzzle_manager import PuzzleManager
+from src.map_manager import MapManager
 
 # --- PALETA INDUSTRIAL ---
 MARRON_FABRICA = (110, 70, 45) 
@@ -23,9 +24,16 @@ NEGRO_TEXTO = (10, 20, 40)
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        # Usamos FULLSCREEN y SCALED para que ocupe toda la pantalla manteniendo la relación de aspecto
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN | pygame.SCALED)
         pygame.display.set_caption("Code Escape: Factory Reset")
         self.clock = pygame.time.Clock()
+
+        # --- INICIALIZAR GESTOR DE MAPAS ---
+        self.map_manager = MapManager()
+
+        # --- INICIALIZAR JUGADOR ---
+        self.player = Player(x=self.map_manager.player_spawn[0], y=self.map_manager.player_spawn[1])
 
         # Fuentes
         self.font_ui = pygame.font.SysFont("monospace", 20)
@@ -46,16 +54,13 @@ class Game:
         self.botones_rects = []
         self.setup_botones()
         
-        self.game_state = "MENU"
-        self.inicio_ticks = 0
-
         # Instancias
-        self.player = Player()
-        self.pc_terminal = Terminal(600, 150, task_id=1)
+        self.pc_terminal = Terminal(self.map_manager.terminal_pos[0], self.map_manager.terminal_pos[1], task_id=1)
         self.puzzle = PuzzleManager()
 
         # Propiedades de la Puerta
-        self.door_rect = pygame.Rect(350, 0, 100, 30)
+        from src.settings import TILE_SIZE
+        self.door_rect = pygame.Rect(self.map_manager.door_pos[0], self.map_manager.door_pos[1], TILE_SIZE, TILE_SIZE)
         self.puerta_abierta = False
 
         # Lógica de Tiempo
@@ -66,12 +71,12 @@ class Game:
         self.tiempo_restante = TIEMPO_LIMITE
     
     def setup_botones(self):
-        """Solapas más pequeñas según lo solicitado."""
-        ancho_b, alto_b = 220, 38 
+        """ Configuración de botones """
+        ancho_b, alto_b = 250, 45 
         x = SCREEN_WIDTH // 2 - ancho_b // 2
         y_inicial = 480  
         for i in range(len(self.opciones)):
-            rect = pygame.Rect(x, y_inicial + (i * 65), ancho_b, alto_b)
+            rect = pygame.Rect(x, y_inicial + (i * 70), ancho_b, alto_b)
             self.botones_rects.append(rect)
     
     def draw_curved_text(self, text, center_x, center_y, radius):
@@ -109,11 +114,11 @@ class Game:
         frame_up = (ticks // 300) % 2 == 0
 
         # Título arriba en el cielo
-        self.draw_curved_text("CODE FACTORY", SCREEN_WIDTH // 2, 400, 340)
+        self.draw_curved_text("CODE FACTORY", SCREEN_WIDTH // 2, 400, 360)
 
-        # Obreros martillando
-        self.dibujar_entorno_obrero(150, 530, frame_up)
-        self.dibujar_entorno_obrero(600, 530, not frame_up)
+        # Obreros martillando (reposicionados para 720p)
+        self.dibujar_entorno_obrero(SCREEN_WIDTH // 5, 530, frame_up)
+        self.dibujar_entorno_obrero(4 * SCREEN_WIDTH // 5, 530, not frame_up)
 
         # Botones con letras en movimiento
         for i, rect in enumerate(self.botones_rects):
@@ -166,24 +171,27 @@ class Game:
 
         # --- Lógica de Movimiento y Victoria ---
         if self.game_state == "EXPLORANDO":
-            self.player.update()
+            self.player.update(self.map_manager.walls)
 
             # Si la puerta está cerrada, bloquea el paso
             if not self.puerta_abierta:
                 if self.player.rect.colliderect(self.door_rect):
-                    self.player.rect.top = self.door_rect.bottom
+                    self.player.rect.right = self.door_rect.left
             else:
                 # Si la puerta está ABIERTA y el jugador la toca -> ¡GANA!
                 if self.player.rect.colliderect(self.door_rect):
                     self.game_state = "GANASTE"
 
     def draw(self):
-        self.screen.fill(COLOR_FONDO)
+        # self.screen.fill(COLOR_FONDO) # El mapa ya llena la pantalla
+        self.map_manager.draw(self.screen)
 
         if self.game_state != "PERDIDO" and self.game_state != "GANASTE":
-            # 1. Dibujar Puerta (Cambia de color según el estado)
-            color_actual_puerta = COLOR_DOOR_OPEN if self.puerta_abierta else COLOR_DOOR
-            pygame.draw.rect(self.screen, color_actual_puerta, self.door_rect)
+            # 1. Dibujar Puerta (Cambia de tile según el estado)
+            if self.puerta_abierta:
+                self.screen.blit(self.map_manager.tiles["DO"], self.door_rect)
+            else:
+                self.screen.blit(self.map_manager.tiles["D"], self.door_rect)
 
             # 2. Dibujar Elementos
             self.pc_terminal.draw(self.screen, self.player.rect)
@@ -228,7 +236,7 @@ class Game:
         pygame.display.flip()
 
     def run(self):
-        """Bucle principal del juego corregido."""
+        """ Bucle principal del juego """
         while True:
             self.handle_events() # Crucial para que la ventana no se cuelgue
             

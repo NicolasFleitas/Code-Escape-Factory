@@ -1,7 +1,8 @@
 # Configuraciones básicas del juego
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
 FPS = 60
+TILE_SIZE = 64
 
 # --- Colores (RGB) ---
 COLOR_FONDO = (30, 30, 30)  # Gris oscuro industrial
