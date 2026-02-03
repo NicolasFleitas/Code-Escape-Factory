@@ -1,21 +1,24 @@
 import pygame
 import sys
+import os
+import math
+import random
+
 from src.settings import (
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT,
-    FPS,
-    COLOR_FONDO,
-    COLOR_DOOR,
-    COLOR_DOOR_OPEN,
-    COLOR_ERROR,
-    COLOR_SUCCESS,
-    COLOR_TIEMPO,
-    TIEMPO_LIMITE,
+    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, COLOR_FONDO,
+    COLOR_DOOR, COLOR_DOOR_OPEN, COLOR_SUCCESS, COLOR_ERROR,
+    COLOR_TIEMPO, TIEMPO_LIMITE
 )
+
 from src.player import Player
 from src.terminal import Terminal
 from src.puzzle_manager import PuzzleManager
 
+# --- PALETA INDUSTRIAL ---
+MARRON_FABRICA = (110, 70, 45) 
+AZUL_ELECTRICO = (0, 150, 255)
+BLANCO_BOTON = (255, 255, 255)
+NEGRO_TEXTO = (10, 20, 40)
 
 class Game:
     def __init__(self):
@@ -27,6 +30,24 @@ class Game:
         # Fuentes
         self.font_ui = pygame.font.SysFont("monospace", 20)
         self.font_final = pygame.font.SysFont("monospace", 40, bold=True)
+        self.font_pixel = pygame.font.SysFont("monospace", 50, bold=True)
+        self.font_botones = pygame.font.SysFont("verdana", 18, bold=True)
+
+        # Carga de Fondo
+        try:
+            ruta_fondo = os.path.join("src", "assets", "menu.png")
+            self.fondo_menu = pygame.image.load(ruta_fondo).convert()
+            self.fondo_menu = pygame.transform.scale(self.fondo_menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        except:
+            self.fondo_menu = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+            self.fondo_menu.fill((30, 30, 35))
+
+        self.opciones = ["START GAME", "EXIT"]
+        self.botones_rects = []
+        self.setup_botones()
+        
+        self.game_state = "MENU"
+        self.inicio_ticks = 0
 
         # Instancias
         self.player = Player()
@@ -40,15 +61,82 @@ class Game:
         # Lógica de Tiempo
         self.inicio_ticks = pygame.time.get_ticks()
 
-        # Estados: "EXPLORANDO", "PROGRAMANDO", "PERDIDO", "GANASTE"
-        self.game_state = "EXPLORANDO"
+        # Estados: "MENU, "EXPLORANDO", "PROGRAMANDO", "PERDIDO", "GANASTE"
+        self.game_state = "MENU"
         self.tiempo_restante = TIEMPO_LIMITE
+    
+    def setup_botones(self):
+        """Solapas más pequeñas según lo solicitado."""
+        ancho_b, alto_b = 220, 38 
+        x = SCREEN_WIDTH // 2 - ancho_b // 2
+        y_inicial = 480  
+        for i in range(len(self.opciones)):
+            rect = pygame.Rect(x, y_inicial + (i * 65), ancho_b, alto_b)
+            self.botones_rects.append(rect)
+    
+    def draw_curved_text(self, text, center_x, center_y, radius):
+        """Dibuja el título curvado en la parte superior (cielo)."""
+        arc_angle = 80
+        start_angle = -90 - (arc_angle / 2)
+        for i, char in enumerate(text):
+            angle = start_angle + (i * (arc_angle / (len(text) - 1)))
+            rad = math.radians(angle)
+            x = center_x + radius * math.cos(rad)
+            y = center_y + radius * math.sin(rad)
+            char_surf = self.font_pixel.render(char, False, MARRON_FABRICA)
+            char_surf = pygame.transform.rotate(char_surf, -angle - 90)
+            self.screen.blit(char_surf, char_surf.get_rect(center=(x, y)))
+    
+    def dibujar_entorno_obrero(self, x, y, frame_up):
+        """Obreros martillando yunque con chispas."""
+        pygame.draw.rect(self.screen, (80, 85, 90), (x + 35, y + 15, 55, 15)) # Yunque
+        pygame.draw.rect(self.screen, (40, 70, 140), (x, y, 24, 34))         # Cuerpo
+        pygame.draw.rect(self.screen, (255, 205, 160), (x + 2, y - 18, 20, 18)) # Cara
+        pygame.draw.rect(self.screen, (255, 160, 0), (x - 2, y - 22, 28, 10))   # Casco
+        
+        angle = -40 if frame_up else 15
+        pygame.draw.rect(self.screen, (255, 205, 160), (x + 18, y + 5 + angle, 15, 8)) # Brazo
+        pygame.draw.rect(self.screen, (150, 150, 160), (x + 28, y - 12 + angle, 18, 12)) # Martillo
+        
+        if not frame_up: # Efecto de chispas al golpear
+            for _ in range(3):
+                pygame.draw.rect(self.screen, (255, 200, 0), (x+50+random.randint(0,20), y+15+random.randint(-5,5), 3, 3))
+
+    def draw_welcome_screen(self):
+        self.screen.blit(self.fondo_menu, (0, 0))
+        mouse_pos = pygame.mouse.get_pos()
+        ticks = pygame.time.get_ticks()
+        frame_up = (ticks // 300) % 2 == 0
+
+        # Título arriba en el cielo
+        self.draw_curved_text("CODE FACTORY", SCREEN_WIDTH // 2, 400, 340)
+
+        # Obreros martillando
+        self.dibujar_entorno_obrero(150, 530, frame_up)
+        self.dibujar_entorno_obrero(600, 530, not frame_up)
+
+        # Botones con letras en movimiento
+        for i, rect in enumerate(self.botones_rects):
+            hover = rect.collidepoint(mouse_pos)
+            color = (230, 245, 255) if hover else BLANCO_BOTON
+            pygame.draw.rect(self.screen, AZUL_ELECTRICO, rect.inflate(4, 4))
+            pygame.draw.rect(self.screen, color, rect)
+            
+            label = self.font_botones.render(self.opciones[i], True, NEGRO_TEXTO)
+            self.screen.blit(label, (rect.centerx - label.get_width() // 2, 
+                                     rect.centery - label.get_height() // 2))
 
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            
+            if self.game_state == "MENU" and event.type == pygame.MOUSEBUTTONDOWN:
+                for i, rect in enumerate(self.botones_rects):
+                    if rect.collidepoint(pygame.mouse.get_pos()):
+                        if i == 0: self.game_state = "EXPLORANDO"
+                        else: pygame.quit(); sys.exit()
 
             if self.game_state == "EXPLORANDO":
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
@@ -140,13 +228,15 @@ class Game:
         pygame.display.flip()
 
     def run(self):
+        """Bucle principal del juego corregido."""
         while True:
-            self.handle_events()
-            self.update()
-            self.draw()
+            self.handle_events() # Crucial para que la ventana no se cuelgue
+            
+            if self.game_state == "MENU":
+                self.draw_welcome_screen()
+                pygame.display.flip() # Necesitas actualizar la pantalla aquí también
+            else:
+                self.update()
+                self.draw()
+                
             self.clock.tick(FPS)
-
-
-def main():
-    game = Game()
-    game.run()
