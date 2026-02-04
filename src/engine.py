@@ -28,6 +28,43 @@ class Game:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN | pygame.SCALED)
         pygame.display.set_caption("Code Escape: Factory Reset")
         self.clock = pygame.time.Clock()
+        
+        # --- INICIALIZAR AUDIO ---
+        pygame.mixer.init()
+        try:
+            ruta_audio = os.path.join("src", "assets", "audio", "ambiente.mp3")
+            pygame.mixer.music.load(ruta_audio)
+            pygame.mixer.music.set_volume(0.3)  # Volumen al 30%
+            pygame.mixer.music.play(-1)  # -1 = loop infinito
+        except Exception as e:
+            print(f"No se pudo cargar el audio de ambiente: {e}")
+        
+        # Cargar sonido de victoria
+        try:
+            ruta_victoria = os.path.join("src", "assets", "audio", "ganaste.mp3")
+            self.victoria_sound = pygame.mixer.Sound(ruta_victoria)
+            self.victoria_sound.set_volume(0.7)  # Volumen al 70%
+        except Exception as e:
+            print(f"No se pudo cargar el sonido de victoria: {e}")
+            self.victoria_sound = None
+        
+        # Cargar sonido de derrota
+        try:
+            ruta_derrota = os.path.join("src", "assets", "audio", "perdiste.mp3")
+            self.derrota_sound = pygame.mixer.Sound(ruta_derrota)
+            self.derrota_sound.set_volume(0.7)  # Volumen al 70%
+        except Exception as e:
+            print(f"No se pudo cargar el sonido de derrota: {e}")
+            self.derrota_sound = None
+        
+        # Cargar sonido de alarma
+        try:
+            ruta_alarma = os.path.join("src", "assets", "audio", "alarma3.mp3")
+            self.alarma_sound = pygame.mixer.Sound(ruta_alarma)
+            self.alarma_sound.set_volume(0.6)  # Volumen al 60%
+        except Exception as e:
+            print(f"No se pudo cargar el sonido de alarma: {e}")
+            self.alarma_sound = None
 
         # --- INICIALIZAR GESTOR DE MAPAS ---
         self.map_manager = MapManager()
@@ -77,6 +114,18 @@ class Game:
         
         # Navegación del menú con teclado
         self.selected_option = 0
+        
+        # Bandera para reproducir sonido de victoria solo una vez
+        self.victoria_sound_played = False
+        self.victoria_sound_start_time = None  # Para controlar cuándo reanudar la música
+        
+        # Bandera para reproducir sonido de derrota solo una vez
+        self.derrota_sound_played = False
+        self.derrota_sound_start_time = None  # Para controlar cuándo reanudar la música
+        
+        # Banderas para reproducir alarma en momentos específicos
+        self.alarma_10s_played = False  # Alarma a los 10 segundos
+        self.alarma_5s_played = False   # Alarma a los 5 segundos
     
     def setup_botones(self):
         """ Configuración de botones """
@@ -215,9 +264,54 @@ class Game:
                 pygame.time.get_ticks() - self.inicio_ticks
             ) // 1000
             self.tiempo_restante = max(0, TIEMPO_LIMITE - segundos_transcurridos)
+            
+            # --- Reproducir alarma cuando quedan 10 segundos o menos ---
+            if self.alarma_sound:
+                # Reproducir a los 10 segundos
+                if self.tiempo_restante <= 10 and self.tiempo_restante > 5 and not self.alarma_10s_played:
+                    self.alarma_sound.play()
+                    self.alarma_10s_played = True
+                
+                # Reproducir a los 5 segundos
+                if self.tiempo_restante <= 5 and self.tiempo_restante > 0 and not self.alarma_5s_played:
+                    self.alarma_sound.play()
+                    self.alarma_5s_played = True
 
             if self.tiempo_restante <= 0:
                 self.game_state = "PERDIDO"
+                # Reproducir sonido de derrota solo una vez
+                if self.derrota_sound and not self.derrota_sound_played:
+                    # Pausar la música de ambiente
+                    pygame.mixer.music.pause()
+                    # Reproducir sonido de derrota
+                    self.derrota_sound.play()
+                    self.derrota_sound_played = True
+                    # Guardar el momento en que empezó el sonido
+                    self.derrota_sound_start_time = pygame.time.get_ticks()
+        
+        # --- Reanudar música de ambiente después del sonido de victoria ---
+        if self.victoria_sound_start_time is not None:
+            # Obtener la duración del sonido de victoria (en milisegundos)
+            if self.victoria_sound:
+                duracion_victoria = self.victoria_sound.get_length() * 1000  # Convertir a ms
+                tiempo_transcurrido = pygame.time.get_ticks() - self.victoria_sound_start_time
+                
+                # Si ya pasó el tiempo del sonido de victoria, reanudar la música
+                if tiempo_transcurrido >= duracion_victoria:
+                    pygame.mixer.music.unpause()
+                    self.victoria_sound_start_time = None  # Resetear el timer
+        
+        # --- Reanudar música de ambiente después del sonido de derrota ---
+        if self.derrota_sound_start_time is not None:
+            # Obtener la duración del sonido de derrota (en milisegundos)
+            if self.derrota_sound:
+                duracion_derrota = self.derrota_sound.get_length() * 1000  # Convertir a ms
+                tiempo_transcurrido = pygame.time.get_ticks() - self.derrota_sound_start_time
+                
+                # Si ya pasó el tiempo del sonido de derrota, reanudar la música
+                if tiempo_transcurrido >= duracion_derrota:
+                    pygame.mixer.music.unpause()
+                    self.derrota_sound_start_time = None  # Resetear el timer
 
         # --- Lógica de Movimiento y Victoria ---
         if self.game_state == "EXPLORANDO":
@@ -231,6 +325,15 @@ class Game:
                 # Si la puerta está ABIERTA y el jugador la toca -> ¡GANA!
                 if self.player.rect.colliderect(self.door_rect):
                     self.game_state = "GANASTE"
+                    # Reproducir sonido de victoria solo una vez
+                    if self.victoria_sound and not self.victoria_sound_played:
+                        # Pausar la música de ambiente
+                        pygame.mixer.music.pause()
+                        # Reproducir sonido de victoria
+                        self.victoria_sound.play()
+                        self.victoria_sound_played = True
+                        # Guardar el momento en que empezó el sonido
+                        self.victoria_sound_start_time = pygame.time.get_ticks()
 
     def draw(self):
         # self.screen.fill(COLOR_FONDO) # El mapa ya llena la pantalla

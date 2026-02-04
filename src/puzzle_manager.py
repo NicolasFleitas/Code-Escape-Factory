@@ -1,4 +1,5 @@
 import pygame
+import os
 from src.settings import COLOR_SUCCESS, COLOR_TEXTO, COLOR_ERROR
 from src.puzzles import CATALOGO_PUZZLES  # Importamos el catálogo
 
@@ -12,6 +13,15 @@ class PuzzleManager:
         self.show_error = False
         self.error_timer = 0
         self.font = pygame.font.SysFont("monospace", 24)
+        
+        # Cargar sonido de error
+        try:
+            ruta_error = os.path.join("src", "assets", "audio", "error.mp3")
+            self.error_sound = pygame.mixer.Sound(ruta_error)
+            self.error_sound.set_volume(0.5)  # Volumen al 50%
+        except Exception as e:
+            print(f"No se pudo cargar el sonido de error: {e}")
+            self.error_sound = None
 
     def set_puzzle(self, task_id):
         """Carga los datos de un puzzle específico del catálogo"""
@@ -36,6 +46,9 @@ class PuzzleManager:
                 else:
                     self.show_error = True
                     self.error_timer = pygame.time.get_ticks()
+                    # Reproducir sonido de error
+                    if self.error_sound:
+                        self.error_sound.play()
             else:
                 # Si el usuario empieza a escribir de nuevo, quitamos el error
                 self.show_error = False
