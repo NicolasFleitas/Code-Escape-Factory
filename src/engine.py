@@ -68,8 +68,8 @@ class Game:
         self.door_rect = pygame.Rect(self.map_manager.door_pos[0], self.map_manager.door_pos[1], TILE_SIZE, TILE_SIZE)
         self.puerta_abierta = False
 
-        # Lógica de Tiempo
-        self.inicio_ticks = pygame.time.get_ticks()
+        # Lógica de Tiempo (se inicializa cuando empieza el juego)
+        self.inicio_ticks = None
 
         # Estados: "MENU, "EXPLORANDO", "PROGRAMANDO", "PERDIDO", "GANASTE"
         self.game_state = "MENU"
@@ -161,6 +161,8 @@ class Game:
                     elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                         if self.selected_option == 0:
                             self.game_state = "EXPLORANDO"
+                            # Iniciar el temporizador cuando comienza el juego
+                            self.inicio_ticks = pygame.time.get_ticks()
                         else:
                             pygame.quit()
                             sys.exit()
@@ -169,8 +171,13 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for i, rect in enumerate(self.botones_rects):
                         if rect.collidepoint(pygame.mouse.get_pos()):
-                            if i == 0: self.game_state = "EXPLORANDO"
-                            else: pygame.quit(); sys.exit()
+                            if i == 0:
+                                self.game_state = "EXPLORANDO"
+                                # Iniciar el temporizador cuando comienza el juego
+                                self.inicio_ticks = pygame.time.get_ticks()
+                            else:
+                                pygame.quit()
+                                sys.exit()
                 
                 # Actualizar selección al pasar el mouse
                 if event.type == pygame.MOUSEMOTION:
@@ -203,7 +210,7 @@ class Game:
 
     def update(self):
         # --- Gestión de Tiempo ---
-        if self.game_state not in ["PERDIDO", "GANASTE"]:
+        if self.game_state not in ["PERDIDO", "GANASTE"] and self.inicio_ticks is not None:
             segundos_transcurridos = (
                 pygame.time.get_ticks() - self.inicio_ticks
             ) // 1000
