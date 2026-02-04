@@ -103,6 +103,20 @@ class UIManager:
         self.screen.blit(overlay, (0, 0))
         puzzle_manager.draw(self.screen)
 
+    def draw_pause_screen(self, opciones, botones_rects, selected_option):
+        # Fondo semitransparente oscuro
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        overlay.set_alpha(200)
+        overlay.fill((0, 0, 0))
+        self.screen.blit(overlay, (0, 0))
+
+        # Título
+        titulo = self.font_pixel.render("PAUSA", True, BLANCO_BOTON)
+        self.screen.blit(titulo, (SCREEN_WIDTH // 2 - titulo.get_width() // 2, 150))
+        
+        # Botones
+        self.draw_menu_buttons(opciones, botones_rects, selected_option)
+
     def draw_end_screen(self, game_state, opciones=None, botones_rects=None, selected_option=0):
         if game_state == "PERDIDO":
             self._render_end_msg("LINTERNA APAGADA", "Te has quedado atrapado en la oscuridad.", COLOR_ERROR, (0, 0, 0))

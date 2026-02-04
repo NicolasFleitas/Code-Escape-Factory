@@ -79,11 +79,19 @@ class Game:
 
         self.opciones_final = ["RESTART", "MENU"]
         self.botones_final_rects = []
+        self.opciones_final = ["RESTART", "MENU"]
+        self.botones_final_rects = []
         self.selected_final_option = 0
+        
+        # Pausa
+        self.opciones_pausa = ["CONTINUAR", "SALIR"]
+        self.botones_pausa_rects = []
+        self.selected_pausa_option = 0
+        self.pausa_start_time = 0
         
         self.setup_botones()
         self.setup_botones_final()
-
+        self.setup_botones_pausa()
 
     # --- Legacy Methods (Proxies to Managers) ---
 
@@ -96,6 +104,17 @@ class Game:
         for i in range(len(self.opciones)):
             rect = pygame.Rect(x, y_inicial + (i * 70), ancho_b, alto_b)
             self.botones_rects.append(rect)
+
+    def setup_botones_pausa(self):
+        """ Configuración de botones para la pantalla de pausa """
+        ancho_b, alto_b = 200, 45
+        y_inicial = 250
+        x = SCREEN_WIDTH // 2 - ancho_b // 2
+        
+        self.botones_pausa_rects = []
+        for i in range(len(self.opciones_pausa)):
+            rect = pygame.Rect(x, y_inicial + (i * 80), ancho_b, alto_b)
+            self.botones_pausa_rects.append(rect)
 
     def setup_botones_final(self):
         """ Configuración de botones para la pantalla de victoria/derrota """
@@ -142,6 +161,8 @@ class Game:
                 self._handle_exploration_events(event)
             elif self.game_state == "PROGRAMANDO":
                 self._handle_programming_events(event)
+            elif self.game_state == "PAUSA":
+                self._handle_pause_events(event)
             elif self.game_state in ["GANASTE", "PERDIDO"]:
                 self._handle_final_events(event)
 
@@ -216,15 +237,57 @@ class Game:
             # Nota: El tiempo no inicia aquí, sino después de seleccionar personaje
         else:
             self._quit()
+            
+    def _handle_pause_events(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                self.selected_pausa_option = (self.selected_pausa_option - 1) % len(self.opciones_pausa)
+            elif event.key == pygame.K_DOWN:
+                self.selected_pausa_option = (self.selected_pausa_option + 1) % len(self.opciones_pausa)
+            elif event.key in [pygame.K_RETURN, pygame.K_KP_ENTER]:
+                self._select_pause_option()
+            elif event.key == pygame.K_ESCAPE:
+                # Al presionar ESC de nuevo, reanudamos
+                self.selected_pausa_option = 0 # reset selección (opcional)
+                self._unpause_game()
+                
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            for i, rect in enumerate(self.botones_pausa_rects):
+                if rect.collidepoint(event.pos):
+                    self.selected_pausa_option = i
+                    self._select_pause_option()
+        elif event.type == pygame.MOUSEMOTION:
+            for i, rect in enumerate(self.botones_pausa_rects):
+                if rect.collidepoint(event.pos):
+                    self.selected_pausa_option = i
+
+    def _select_pause_option(self):
+        if self.selected_pausa_option == 0: # CONTINUAR
+            self._unpause_game()
+        else: # SALIR
+            self.game_state = "MENU"
+            self.reset_game()
+            
+    def _unpause_game(self):
+        """ Reanuda el juego ajustando el temporizador """
+        duracion_pausa = pygame.time.get_ticks() - self.pausa_start_time
+        self.inicio_ticks += duracion_pausa
+        self.game_state = "EXPLORANDO"
+        pygame.mixer.music.unpause()
 
     def _handle_exploration_events(self, event):
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-            for t in self.terminals:
-                if t.is_player_near(self.player.rect):
-                    self.active_terminal = t
-                    self.puzzle.set_puzzle(t.task_id)
-                    self.game_state = "PROGRAMANDO"
-                    break
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_e:
+                for t in self.terminals:
+                    if t.is_player_near(self.player.rect):
+                        self.active_terminal = t
+                        self.puzzle.set_puzzle(t.task_id)
+                        self.game_state = "PROGRAMANDO"
+                        break
+            elif event.key == pygame.K_ESCAPE:
+                self.game_state = "PAUSA"
+                self.pausa_start_time = pygame.time.get_ticks()
+                pygame.mixer.music.pause()
 
     def _handle_programming_events(self, event):
         result = self.puzzle.handle_event(event)
@@ -248,7 +311,7 @@ class Game:
         self._update_movement()
 
     def _update_timer(self):
-        if self.game_state not in ["PERDIDO", "GANASTE"] and self.inicio_ticks is not None:
+        if self.game_state not in ["PERDIDO", "GANASTE", "PAUSA"] and self.inicio_ticks is not None:
             segundos_transcurridos = (pygame.time.get_ticks() - self.inicio_ticks) // 1000
             self.tiempo_restante = max(0, TIEMPO_LIMITE - segundos_transcurridos)
             
@@ -301,7 +364,16 @@ class Game:
         self.screen.fill(COLOR_FONDO)
         self.map_manager.draw(self.screen)
 
-        if self.game_state not in ["PERDIDO", "GANASTE"]:
+        if self.game_state == "PAUSA":
+            # Dibujar gameplay de fondo (congelado)
+            self._draw_gameplay()
+            # Dibujar overlay de pausa
+            self.ui_manager.draw_pause_screen(
+                self.opciones_pausa, 
+                self.botones_pausa_rects, 
+                self.selected_pausa_option
+            )
+        elif self.game_state not in ["PERDIDO", "GANASTE"]:
             self._draw_gameplay()
         else:
             self.ui_manager.draw_end_screen(
