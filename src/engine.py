@@ -69,6 +69,9 @@ class Game:
         # Estados: "MENU, "EXPLORANDO", "PROGRAMANDO", "PERDIDO", "GANASTE"
         self.game_state = "MENU"
         self.tiempo_restante = TIEMPO_LIMITE
+        
+        # Navegación del menú con teclado
+        self.selected_option = 0
     
     def setup_botones(self):
         """ Configuración de botones """
@@ -123,8 +126,14 @@ class Game:
         # Botones con letras en movimiento
         for i, rect in enumerate(self.botones_rects):
             hover = rect.collidepoint(mouse_pos)
-            color = (230, 245, 255) if hover else BLANCO_BOTON
-            pygame.draw.rect(self.screen, AZUL_ELECTRICO, rect.inflate(4, 4))
+            selected = (i == self.selected_option)
+            
+            # Resaltar la opción seleccionada (por teclado o mouse)
+            color = (230, 245, 255) if (hover or selected) else BLANCO_BOTON
+            border_color = (255, 200, 0) if selected else AZUL_ELECTRICO
+            border_width = 6 if selected else 4
+            
+            pygame.draw.rect(self.screen, border_color, rect.inflate(border_width, border_width))
             pygame.draw.rect(self.screen, color, rect)
             
             label = self.font_botones.render(self.opciones[i], True, NEGRO_TEXTO)
@@ -137,11 +146,32 @@ class Game:
                 pygame.quit()
                 sys.exit()
             
-            if self.game_state == "MENU" and event.type == pygame.MOUSEBUTTONDOWN:
-                for i, rect in enumerate(self.botones_rects):
-                    if rect.collidepoint(pygame.mouse.get_pos()):
-                        if i == 0: self.game_state = "EXPLORANDO"
-                        else: pygame.quit(); sys.exit()
+            if self.game_state == "MENU":
+                # Navegación con teclado
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        self.selected_option = (self.selected_option - 1) % len(self.opciones)
+                    elif event.key == pygame.K_DOWN:
+                        self.selected_option = (self.selected_option + 1) % len(self.opciones)
+                    elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                        if self.selected_option == 0:
+                            self.game_state = "EXPLORANDO"
+                        else:
+                            pygame.quit()
+                            sys.exit()
+                
+                # Navegación con mouse (mantener funcionalidad existente)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for i, rect in enumerate(self.botones_rects):
+                        if rect.collidepoint(pygame.mouse.get_pos()):
+                            if i == 0: self.game_state = "EXPLORANDO"
+                            else: pygame.quit(); sys.exit()
+                
+                # Actualizar selección al pasar el mouse
+                if event.type == pygame.MOUSEMOTION:
+                    for i, rect in enumerate(self.botones_rects):
+                        if rect.collidepoint(pygame.mouse.get_pos()):
+                            self.selected_option = i
 
             if self.game_state == "EXPLORANDO":
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
