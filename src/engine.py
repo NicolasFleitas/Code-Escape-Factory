@@ -298,6 +298,7 @@ class Game:
     # --- Drawing ---
 
     def draw(self):
+        self.screen.fill(COLOR_FONDO)
         self.map_manager.draw(self.screen)
 
         if self.game_state not in ["PERDIDO", "GANASTE"]:
