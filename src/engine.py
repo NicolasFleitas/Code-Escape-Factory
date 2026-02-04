@@ -17,6 +17,7 @@ from src.puzzle_manager import PuzzleManager
 from src.map_manager import MapManager
 from src.audio_manager import AudioManager
 from src.ui_manager import UIManager
+from src.character_selector import CharacterSelector
 
 class Game:
     def __init__(self):
@@ -29,6 +30,7 @@ class Game:
         self.ui_manager = UIManager(self.screen)
         self.map_manager = MapManager()
         self.puzzle = PuzzleManager()
+        self.character_selector = CharacterSelector(self.screen)
 
         # Legacy attributes (preserving identifiers)
         self.victoria_sound = self.audio_manager.victoria_sound
@@ -59,7 +61,7 @@ class Game:
         self.puerta_abierta = False
 
     def _setup_state(self):
-        self.game_state = "MENU"
+        self.game_state = "MENU"  # Comienza en el Menú Principal
         self.opciones = ["START GAME", "EXIT"]
         self.botones_rects = []
         self.selected_option = 0
@@ -103,7 +105,18 @@ class Game:
             if event.type == pygame.QUIT:
                 self._quit()
             
-            if self.game_state == "MENU":
+            if self.game_state == "CHARACTER_SELECT":
+                # Manejar selección de personajes
+                if self.character_selector.handle_event(event):
+                    # Obtener selección y configurar jugador
+                    _, imagen_pj = self.character_selector.get_selected_character()
+                    if imagen_pj:
+                        self.player.set_custom_sprite(imagen_pj)
+                    
+                    # Selección completada, iniciar juego
+                    self.game_state = "EXPLORANDO"
+                    self.inicio_ticks = pygame.time.get_ticks()  # Iniciar tiempo aquí
+            elif self.game_state == "MENU":
                 self._handle_menu_events(event)
             elif self.game_state == "EXPLORANDO":
                 self._handle_exploration_events(event)
@@ -130,8 +143,9 @@ class Game:
 
     def _select_menu_option(self):
         if self.selected_option == 0:
-            self.game_state = "EXPLORANDO"
-            self.inicio_ticks = pygame.time.get_ticks()
+            # Ir a selección de personaje en lugar de directo al juego
+            self.game_state = "CHARACTER_SELECT"
+            # Nota: El tiempo no inicia aquí, sino después de seleccionar personaje
         else:
             self._quit()
 
@@ -246,7 +260,10 @@ class Game:
         """ Bucle principal del juego """
         while True:
             self.handle_events()
-            if self.game_state == "MENU":
+            if self.game_state == "CHARACTER_SELECT":
+                self.character_selector.dibujar_menu()
+                pygame.display.flip()
+            elif self.game_state == "MENU":
                 self.draw_welcome_screen()
                 pygame.display.flip()
             else:
