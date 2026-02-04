@@ -9,6 +9,8 @@ class PuzzleManager:
         self.input_text = ""
         self.target_code = ""
         self.instruction = ""
+        self.pista = ""
+        self.manual_pista = False # Nueva bandera para mostrar pista con H
         self.is_solved = False
         self.show_error = False
         self.error_timer = 0
@@ -28,8 +30,10 @@ class PuzzleManager:
         puzzle_data = CATALOGO_PUZZLES.get(task_id)
         if puzzle_data:
             self.instruction = puzzle_data["instruccion"]
+            self.pista = puzzle_data.get("pista", "")
             self.target_code = puzzle_data["solucion"]
             self.input_text = ""
+            self.manual_pista = False
             self.is_solved = False
             self.show_error = False
             self.error_timer = 0
@@ -49,10 +53,13 @@ class PuzzleManager:
                     # Reproducir sonido de error
                     if self.error_sound:
                         self.error_sound.play()
+            elif event.key == pygame.K_h: # Tecla H para ayuda
+                self.manual_pista = not self.manual_pista
             else:
                 # Si el usuario empieza a escribir de nuevo, quitamos el error
                 self.show_error = False
-                if len(self.input_text) < 25:
+                # Solo agregamos caracteres si no es la tecla H (para evitar escribir 'h' accidentalmente)
+                if event.key != pygame.K_h and len(self.input_text) < 25:
                     self.input_text += event.unicode
         return None
 
@@ -87,3 +94,17 @@ class PuzzleManager:
                 "ERROR DE SINTAXIS. Comando no reconocido.", True, COLOR_ERROR
             )
             surface.blit(err_msg, (100, 350))
+            
+            # Dibujar la pista debajo del error
+            pista_surf = self.font.render(self.pista, True, (200, 200, 100))
+            surface.blit(pista_surf, (100, 400))
+        
+        # Mostrar pista si se presiona H (aunque no haya error)
+        if self.manual_pista and not self.is_solved:
+            pista_surf = self.font.render(f"AYUDA: {self.pista}", True, (200, 200, 100))
+            surface.blit(pista_surf, (100, 450))
+        
+        # Leyenda de ayuda
+        if not self.is_solved:
+            hint_msg = self.font.render("Presiona [H] para ver/ocultar pista", True, (80, 80, 80))
+            surface.blit(hint_msg, (100, 550))
