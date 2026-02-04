@@ -53,48 +53,49 @@ class Player:
     def update(self, walls=[]):
         keys = pygame.key.get_pressed()
         
-        # Movimiento Horizontal
-        moved_h = False
+        # 1. MOVER HORIZONTALMENTE
+        dx = 0
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            self.rect.x -= PLAYER_SPEED
+            dx -= PLAYER_SPEED
             self.direction = "izquierda"
-            moved_h = True
-        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            self.rect.x += PLAYER_SPEED
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            dx += PLAYER_SPEED
             self.direction = "derecha"
-            moved_h = True
-        
-        # Colisión Horizontal
-        for wall in walls:
-            if self.rect.colliderect(wall):
-                if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-                    self.rect.left = wall.right
-                if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-                    self.rect.right = wall.left
-
-        # Movimiento Vertical
-        moved_v = False
-        if keys[pygame.K_w] or keys[pygame.K_UP]:
-            self.rect.y -= PLAYER_SPEED
-            if not moved_h: self.direction = "espalda"
-            moved_v = True
-        elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
-            self.rect.y += PLAYER_SPEED
-            if not moved_h: self.direction = "frente"
-            moved_v = True
             
-        # Colisión Vertical
+        self.rect.x += dx
+        
+        # Colisión Horizontal: Si colisionamos, volvemos atrás
         for wall in walls:
             if self.rect.colliderect(wall):
-                if keys[pygame.K_w] or keys[pygame.K_UP]:
-                    self.rect.top = wall.bottom
-                if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-                    self.rect.bottom = wall.top
+                if dx > 0: # Íbamos a la derecha
+                    self.rect.right = wall.left
+                if dx < 0: # Íbamos a la izquierda
+                    self.rect.left = wall.right
 
-        # Actualizar imagen según dirección
+        # 2. MOVER VERTICALMENTE
+        dy = 0
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
+            dy -= PLAYER_SPEED
+            # Priorizamos dirección lateral si ya se está moviendo horizontalmente
+            if dx == 0: self.direction = "espalda"
+        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            dy += PLAYER_SPEED
+            if dx == 0: self.direction = "frente"
+            
+        self.rect.y += dy
+        
+        # Colisión Vertical: Si colisionamos, volvemos atrás
+        for wall in walls:
+            if self.rect.colliderect(wall):
+                if dy > 0: # Íbamos hacia abajo
+                    self.rect.bottom = wall.top
+                if dy < 0: # Íbamos hacia arriba
+                    self.rect.top = wall.bottom
+
+        # 3. ACTUALIZAR IMAGEN
         self.image = self.sprites.get(self.direction, self.sprites["frente"])
 
-        # Limitar movimiento a los bordes de la pantalla
+        # 4. LIMITAR A LA PANTALLA
         self.rect.clamp_ip(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
 
     def draw(self, surface):
