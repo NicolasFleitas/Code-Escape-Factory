@@ -61,7 +61,7 @@ class CharacterSelector:
             self.lista_personajes_img.append(self._cargar_imagen(ruta, 150, 150, alpha=True))
         
         # Nombres de personajes
-        self.personajes_nombres = ["Pepe (Obrero 1)", "Pedro (Obrero 2)", "Juan (Obrero 3)"]
+        self.personajes_nombres = ["Obrero", "Jefe", "Bombero"]
 
         
         # Calcular áreas de interacción (Rects) para el mouse
