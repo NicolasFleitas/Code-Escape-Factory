@@ -88,12 +88,12 @@ class UIManager:
 
     def draw_gameplay_ui(self, tiempo_restante, terminals):
         # Energía
-        timer_text = self.font_ui.render(f"ENERGIA LINTERNA: {tiempo_restante}s", True, COLOR_TIEMPO)
+        timer_text = self.font_ui.render(f"Tiempo restante: {tiempo_restante}s", True, COLOR_TIEMPO)
         self.screen.blit(timer_text, (20, 20))
         
         # Terminales resueltas
         solved_count = sum(1 for t in terminals if t.solved)
-        progress_text = self.font_ui.render(f"TERMINALES: {solved_count}/{len(terminals)}", True, (0, 255, 255))
+        progress_text = self.font_ui.render(f"Misiones: {solved_count}/{len(terminals)}", True, (0, 255, 255))
         self.screen.blit(progress_text, (20, 50))
 
     def draw_programming_overlay(self, puzzle_manager):
@@ -105,7 +105,7 @@ class UIManager:
 
     def draw_end_screen(self, game_state, opciones=None, botones_rects=None, selected_option=0):
         if game_state == "PERDIDO":
-            self._render_end_msg("LINTERNA APAGADA", "Te has quedado atrapado en la oscuridad.", COLOR_ERROR, (0, 0, 0))
+            self._render_end_msg("PERDISTE", "Te has quedado encerrado en la fabrica.", COLOR_ERROR, (0, 0, 0))
         elif game_state == "GANASTE":
             self._render_end_msg("¡GANASTE!", "Has escapado de la fabrica a tiempo.", COLOR_SUCCESS, (20, 50, 20))
         
