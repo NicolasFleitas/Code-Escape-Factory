@@ -25,3 +25,10 @@ INTERACTION_DISTANCE = 100
 
 # --- Lógica de Juego ---
 TIEMPO_LIMITE = 60  # 1 minuto en segundos
+
+# --- PALETA INDUSTRIAL ---
+MARRON_FABRICA = (110, 70, 45) 
+AZUL_ELECTRICO = (0, 150, 255)
+BLANCO_BOTON = (255, 255, 255)
+NEGRO_TEXTO = (10, 20, 40)
+
