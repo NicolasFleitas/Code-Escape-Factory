@@ -45,7 +45,7 @@ class Game:
 
         self._setup_entities()
         self._setup_state()
-        self.setup_botones()
+
 
     def _init_pygame(self):
         pygame.init()
@@ -77,6 +77,14 @@ class Game:
         self.alarma_10s_played = False
         self.alarma_5s_played = False
 
+        self.opciones_final = ["RESTART", "MENU"]
+        self.botones_final_rects = []
+        self.selected_final_option = 0
+        
+        self.setup_botones()
+        self.setup_botones_final()
+
+
     # --- Legacy Methods (Proxies to Managers) ---
 
     def setup_botones(self):
@@ -88,6 +96,19 @@ class Game:
         for i in range(len(self.opciones)):
             rect = pygame.Rect(x, y_inicial + (i * 70), ancho_b, alto_b)
             self.botones_rects.append(rect)
+
+    def setup_botones_final(self):
+        """ Configuración de botones para la pantalla de victoria/derrota """
+        ancho_b, alto_b = 200, 45
+        espaciado = 250
+        ancho_total = (len(self.opciones_final) - 1) * espaciado
+        x_inicio = (SCREEN_WIDTH - ancho_total) // 2 - (ancho_b // 2)
+        y = SCREEN_HEIGHT // 2 + 100
+        
+        self.botones_final_rects = []
+        for i in range(len(self.opciones_final)):
+            rect = pygame.Rect(x_inicio + (i * espaciado), y, ancho_b, alto_b)
+            self.botones_final_rects.append(rect)
 
     def draw_curved_text(self, text, center_x, center_y, radius):
         self.ui_manager.draw_curved_text(text, center_x, center_y, radius)
@@ -121,6 +142,54 @@ class Game:
                 self._handle_exploration_events(event)
             elif self.game_state == "PROGRAMANDO":
                 self._handle_programming_events(event)
+            elif self.game_state in ["GANASTE", "PERDIDO"]:
+                self._handle_final_events(event)
+
+    def _handle_final_events(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                self.selected_final_option = (self.selected_final_option - 1) % len(self.opciones_final)
+            elif event.key == pygame.K_RIGHT:
+                self.selected_final_option = (self.selected_final_option + 1) % len(self.opciones_final)
+            elif event.key in [pygame.K_RETURN, pygame.K_KP_ENTER]:
+                self._select_final_option()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            for i, rect in enumerate(self.botones_final_rects):
+                if rect.collidepoint(event.pos):
+                    self.selected_final_option = i
+                    self._select_final_option()
+        elif event.type == pygame.MOUSEMOTION:
+            for i, rect in enumerate(self.botones_final_rects):
+                if rect.collidepoint(event.pos):
+                    self.selected_final_option = i
+
+    def _select_final_option(self):
+        if self.selected_final_option == 0:  # RESTART
+            self.reset_game()
+            self.game_state = "CHARACTER_SELECT"
+        else:  # MENU
+            self.reset_game()
+            self.game_state = "MENU"
+
+    def reset_game(self):
+        """ Reinicia el estado del juego para una nueva partida """
+        self._setup_entities()
+        self._setup_state()
+        self.active_terminal = None
+        self.puerta_abierta = False
+        pygame.mixer.music.unpause()
+        
+        # Reset flags de sonido específicamente
+        self.victoria_sound_played = False
+        self.derrota_sound_played = False
+        self.alarma_10s_played = False
+        self.alarma_5s_played = False
+        
+        # Asegurarse de que el selector de personajes también se reinicie
+        self.character_selector.en_menu = True
+        self.character_selector.indice_seleccionado = 0
+        self.character_selector.personaje_elegido = None
+        self.character_selector.imagen_elegida = None
 
     def _handle_menu_events(self, event):
         if event.type == pygame.KEYDOWN:
@@ -234,7 +303,12 @@ class Game:
         if self.game_state not in ["PERDIDO", "GANASTE"]:
             self._draw_gameplay()
         else:
-            self.ui_manager.draw_end_screen(self.game_state)
+            self.ui_manager.draw_end_screen(
+                self.game_state, 
+                opciones=self.opciones_final, 
+                botones_rects=self.botones_final_rects, 
+                selected_option=self.selected_final_option
+            )
 
         pygame.display.flip()
 

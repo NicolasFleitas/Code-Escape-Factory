@@ -103,11 +103,14 @@ class UIManager:
         self.screen.blit(overlay, (0, 0))
         puzzle_manager.draw(self.screen)
 
-    def draw_end_screen(self, game_state):
+    def draw_end_screen(self, game_state, opciones=None, botones_rects=None, selected_option=0):
         if game_state == "PERDIDO":
             self._render_end_msg("LINTERNA APAGADA", "Te has quedado atrapado en la oscuridad.", COLOR_ERROR, (0, 0, 0))
         elif game_state == "GANASTE":
             self._render_end_msg("¡GANASTE!", "Has escapado de la fabrica a tiempo.", COLOR_SUCCESS, (20, 50, 20))
+        
+        if opciones and botones_rects:
+            self.draw_menu_buttons(opciones, botones_rects, selected_option)
 
     def _render_end_msg(self, title, subtitle, title_color, bg_color):
         self.screen.fill(bg_color)

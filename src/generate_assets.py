@@ -4,7 +4,9 @@ import os
 def create_assets():
     pygame.init()
     tile_size = 64
-    assets_dir = os.path.join("src", "assets")
+    # Refactorizado para ser relativo a la ubicación del script
+    ruta_base = os.path.dirname(os.path.abspath(__file__))
+    assets_dir = os.path.join(ruta_base, "assets")
     os.makedirs(assets_dir, exist_ok=True)
 
     # 1. Piso Metálico
@@ -57,7 +59,7 @@ def create_assets():
     
     pygame.image.save(terminal, os.path.join(assets_dir, "terminal.png"))
 
-    print("Assets generados exitosamente en src/assets/")
+    print(f"Assets generados exitosamente en {assets_dir}")
     pygame.quit()
 
 if __name__ == "__main__":
