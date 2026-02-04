@@ -40,11 +40,21 @@ def create_assets():
     pygame.draw.circle(door_open, (100, 255, 100), (tile_size // 2, tile_size // 2), 5)
     pygame.image.save(door_open, os.path.join(assets_dir, "door_open.png"))
 
-    # 5. Terminal (Extra, para mantenerla funcional)
-    terminal = pygame.Surface((tile_size, tile_size))
-    terminal.fill((30, 30, 35))
-    pygame.draw.rect(terminal, (0, 255, 100), (10, 10, tile_size-20, tile_size-30), 2) # Pantalla
-    pygame.draw.rect(terminal, (50, 50, 60), (5, tile_size-15, tile_size-10, 10)) # Teclado
+    # 5. Terminal (Pixel Retro)
+    terminal = pygame.Surface((tile_size, tile_size), pygame.SRCALPHA)
+    # Cuerpo de la computadora
+    pygame.draw.rect(terminal, (50, 50, 60), (10, 20, 44, 34)) # Monitor
+    pygame.draw.rect(terminal, (30, 30, 40), (8, 54, 48, 10)) # Base teclado
+    # Pantalla
+    pygame.draw.rect(terminal, (0, 40, 0), (14, 24, 36, 26)) # Fondo pantalla
+    pygame.draw.rect(terminal, (0, 200, 50), (16, 26, 32, 22), 1) # Borde neón
+    # Detalle de scanlines o texto retro
+    for i in range(26, 48, 4):
+        pygame.draw.line(terminal, (0, 60, 20), (16, i), (48, i))
+    # Luces de estado
+    pygame.draw.rect(terminal, (255, 0, 0), (40, 56, 4, 3)) # Luz roja
+    pygame.draw.rect(terminal, (0, 255, 0), (46, 56, 4, 3)) # Luz verde
+    
     pygame.image.save(terminal, os.path.join(assets_dir, "terminal.png"))
 
     print("Assets generados exitosamente en src/assets/")
