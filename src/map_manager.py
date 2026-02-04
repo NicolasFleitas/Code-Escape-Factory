@@ -18,26 +18,27 @@ class MapManager:
             "P": self.load_tile("floor.png") # El jugador aparece sobre el suelo
         }
         
-        # Mapa 20x12 (1280x768 si TILE_SIZE=64, se recorta un poco abajo o se ajusta)
-        # Para 1280x720 exactamente son 20x11.25 tiles, usaremos 20x12 y Pygame SCALED lo ajustará.
+        # Mapa 20x12 (1280x720) - Layout 2x2 Salas
         self.map_matrix = [
             "WWWWWWWWWWWWWWWWWWWW",
-            "W..................W",
-            "W...T..............W",
-            "W..................W",
-            "W..................W",
-            "W..................W",
-            "W.........P........W",
-            "W..................W",
-            "W..................W",
-            "W..................W",
-            "W..................D",
+            "W    T    W    T   W",
+            "W         W        W",
+            "W         W        W",
+            "W   WWWWWWWWWWWW   W",
+            "W         P        W",
+            "W   WWWWWWWWWWWW   W",
+            "W         W        W",
+            "W         W        W",
+            "W    T    W    T   W",
+            "W         W        D",
             "WWWWWWWWWWWWWWWWWWWW"
         ]
+        # Limpieza de espacios para consistencia (usamos '.' para suelo)
+        self.map_matrix = [row.replace(" ", ".") for row in self.map_matrix]
         
         self.walls = []
         self.player_spawn = [10 * TILE_SIZE, 6 * TILE_SIZE]
-        self.terminal_pos = [4 * TILE_SIZE, 2 * TILE_SIZE]
+        self.terminals = [] # Lista de posiciones [x, y]
         self.door_pos = [17 * TILE_SIZE, 10 * TILE_SIZE]
         
         self._build_map()
@@ -55,6 +56,7 @@ class MapManager:
 
     def _build_map(self):
         self.walls = []
+        self.terminals = []
         for row_index, row in enumerate(self.map_matrix):
             for col_index, char in enumerate(row):
                 x = col_index * TILE_SIZE
@@ -65,7 +67,7 @@ class MapManager:
                 elif char == "P":
                     self.player_spawn = [x, y]
                 elif char == "T":
-                    self.terminal_pos = [x, y]
+                    self.terminals.append([x, y])
                 elif char == "D":
                     self.door_pos = [x, y]
 

@@ -55,7 +55,12 @@ class Game:
         self.setup_botones()
         
         # Instancias
-        self.pc_terminal = Terminal(self.map_manager.terminal_pos[0], self.map_manager.terminal_pos[1], task_id=1)
+        self.terminals = []
+        for i, pos in enumerate(self.map_manager.terminals):
+            # Asignamos IDs de puzzle incrementales (1, 2, 3...)
+            self.terminals.append(Terminal(pos[0], pos[1], task_id=i+1))
+        
+        self.active_terminal = None # La terminal con la que se está interactuando
         self.puzzle = PuzzleManager()
 
         # Propiedades de la Puerta
@@ -175,15 +180,23 @@ class Game:
 
             if self.game_state == "EXPLORANDO":
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-                    # CARGAMOS EL PUZZLE SEGÚN EL ID DE LA TERMINAL
-                    self.puzzle.set_puzzle(self.pc_terminal.task_id)
-                    self.game_state = "PROGRAMANDO"
+                    # Buscamos la terminal más cercana
+                    for t in self.terminals:
+                        if t.is_player_near(self.player.rect):
+                            self.active_terminal = t
+                            self.puzzle.set_puzzle(t.task_id)
+                            self.game_state = "PROGRAMANDO"
+                            break
 
             elif self.game_state == "PROGRAMANDO":
                 result = self.puzzle.handle_event(event)
                 if result == "SOLVED":
-                    self.puerta_abierta = True
-                    # No regresamos inmediatamente para que el usuario vea el éxito
+                    if self.active_terminal:
+                        self.active_terminal.solved = True
+                    
+                    # Verificar si TODAS las terminales han sido resueltas
+                    if all(t.solved for t in self.terminals):
+                        self.puerta_abierta = True
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.game_state = "EXPLORANDO"
@@ -224,7 +237,8 @@ class Game:
                 self.screen.blit(self.map_manager.tiles["D"], self.door_rect)
 
             # 2. Dibujar Elementos
-            self.pc_terminal.draw(self.screen, self.player.rect)
+            for t in self.terminals:
+                t.draw(self.screen, self.player.rect)
             self.player.draw(self.screen)
 
             # 3. Dibujar UI de Energía
@@ -232,6 +246,12 @@ class Game:
                 f"ENERGIA LINTERNA: {self.tiempo_restante}s", True, COLOR_TIEMPO
             )
             self.screen.blit(timer_text, (20, 20))
+            
+            solved_count = sum(1 for t in self.terminals if t.solved)
+            progress_text = self.font_ui.render(
+                f"TERMINALES: {solved_count}/{len(self.terminals)}", True, (0, 255, 255)
+            )
+            self.screen.blit(progress_text, (20, 50))
 
             # 4. Overlay de Terminal
             if self.game_state == "PROGRAMANDO":

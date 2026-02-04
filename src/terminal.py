@@ -15,6 +15,7 @@ class Terminal:
         self.rect = self.image.get_rect(topleft=(x, y))
         self.task_id = task_id  # Identificador del puzzle que contiene
         self.active = False  # ¿Está el jugador interactuando ahora?
+        self.solved = False # ¿Ya se resolvió este puzzle?
 
     def is_player_near(self, player_rect):
         # Calculamos la distancia entre el centro del jugador y la terminal

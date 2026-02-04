@@ -9,5 +9,14 @@ CATALOGO_PUZZLES = {
         "solucion": "energia = 100",
         "pista": "Usa el signo = para asignar el valor.",
     },
-    #  Agregar más niveles aquí
+    3: {
+        "instruccion": "# SEGURIDAD: Define el código de acceso como 1234 (número):",
+        "solucion": "codigo = 1234",
+        "pista": "No uses comillas si es un número.",
+    },
+    4: {
+        "instruccion": "# SISTEMA: Activa los ventiladores configurando ventilacion = 'ON':",
+        "solucion": "ventilacion = 'ON'",
+        "pista": "Usa comillas para cadenas de texto (Strings).",
+    },
 }
