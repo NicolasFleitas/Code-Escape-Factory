@@ -18,26 +18,31 @@ class Player:
         else:
             self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
-        # Cargar Sprites
-        self.sprites = {}
-        self.load_sprites()
-        
         # Dirección actual ("frente", "espalda", "izquierda", "derecha")
         self.direction = "frente"
-        self.image = self.sprites.get(self.direction)
+
+        # Cargar Sprites (por defecto obrero 1)
+        self.sprites = {}
+        self.load_sprites(character_id=1)
         
         # Sprite personalizado (si se selecciona uno diferente al default)
         self.custom_sprite = None
 
-    def load_sprites(self):
+
+    def load_sprites(self, character_id=1):
         ruta_base = os.path.dirname(os.path.abspath(__file__))
-        ruta_player = os.path.join(ruta_base, "assets", "player")
+        ruta_personajes = os.path.join(ruta_base, "assets", "personajes")
         
         try:
+            # Construir nombres de archivos basados en el character_id
+            archivo_frente = f"obrero{character_id}-frente.png"
+            archivo_espalda = f"obrero{character_id}-espalda.png"
+            archivo_perfil = f"obrero{character_id}-perfil.png"
+
             # Cargar imágenes originales
-            frente = pygame.image.load(os.path.join(ruta_player, "frente.png")).convert_alpha()
-            espalda = pygame.image.load(os.path.join(ruta_player, "espalda.png")).convert_alpha()
-            perfil = pygame.image.load(os.path.join(ruta_player, "perfil.png")).convert_alpha()
+            frente = pygame.image.load(os.path.join(ruta_personajes, archivo_frente)).convert_alpha()
+            espalda = pygame.image.load(os.path.join(ruta_personajes, archivo_espalda)).convert_alpha()
+            perfil = pygame.image.load(os.path.join(ruta_personajes, archivo_perfil)).convert_alpha()
             
             # Escalar al tamaño definido en settings
             self.sprites["frente"] = pygame.transform.scale(frente, (PLAYER_SIZE, PLAYER_SIZE))
@@ -46,12 +51,16 @@ class Player:
             # Invertir perfil para la izquierda
             self.sprites["izquierda"] = pygame.transform.flip(self.sprites["derecha"], True, False)
             
+            # Actualizar imagen actual
+            self.image = self.sprites.get(self.direction, self.sprites["frente"])
+            
         except Exception as e:
-            print(f"⚠️ Error cargando sprites del jugador: {e}")
+            print(f"⚠️ Error cargando sprites del jugador (obrero {character_id}): {e}")
             # Fallback a un color sólido si fallan las imágenes
             surface = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE))
             surface.fill(COLOR_PLAYER)
             self.sprites = {"frente": surface, "espalda": surface, "izquierda": surface, "derecha": surface}
+            self.image = surface
             
     def set_custom_sprite(self, image):
         """Establece un sprite personalizado único para todas las direcciones (o base)"""
