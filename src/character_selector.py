@@ -48,21 +48,21 @@ class CharacterSelector:
         self.imagen_fondo = self._cargar_imagen(ruta_fondo, SCREEN_WIDTH, SCREEN_HEIGHT)
         
         # Personajes (preservando nombre exacto de variable)
-        # Usamos la misma imagen de frente para todos por ahora
-        ruta_frente = os.path.join("src", "assets", "personajes", "obrero1-frente.png")
-        nombres_png = [
-            ruta_frente,
-            ruta_frente,
-            ruta_frente
-        ]
-        self.lista_personajes_img = [
-            self._cargar_imagen(nombre, 150, 150, alpha=True) 
-            for nombre in nombres_png
+        # Cargamos la imagen de frente de cada obrero
+        nombres_archivos = [
+            "obrero1-frente.png",
+            "obrero2-frente.png",
+            "obrero3-frente.png"
         ]
         
+        self.lista_personajes_img = []
+        for nombre in nombres_archivos:
+            ruta = os.path.join("src", "assets", "personajes", nombre)
+            self.lista_personajes_img.append(self._cargar_imagen(ruta, 150, 150, alpha=True))
         
         # Nombres de personajes
-        self.personajes_nombres = ["Pepe", "Pedro", "Juan"]
+        self.personajes_nombres = ["Pepe (Obrero 1)", "Pedro (Obrero 2)", "Juan (Obrero 3)"]
+
         
         # Calcular áreas de interacción (Rects) para el mouse
         self.rects = []

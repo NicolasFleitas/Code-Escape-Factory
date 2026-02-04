@@ -6,7 +6,7 @@ class MapManager:
     def __init__(self):
         # Rutas relativas dinámicas
         self.ruta_base = os.path.dirname(os.path.abspath(__file__))
-        self.ruta_assets = os.path.join(self.ruta_base, "assets")
+        self.ruta_assets = os.path.join(self.ruta_base, "assets", "items_mapa")
         
         # Cargar imágenes de los tiles
         self.tiles = {

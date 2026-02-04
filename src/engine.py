@@ -108,10 +108,9 @@ class Game:
             if self.game_state == "CHARACTER_SELECT":
                 # Manejar selección de personajes
                 if self.character_selector.handle_event(event):
-                    # Obtener selección y configurar jugador
-                    _, imagen_pj = self.character_selector.get_selected_character()
-                    if imagen_pj:
-                        self.player.set_custom_sprite(imagen_pj)
+                    # Configurar sprites del jugador según la selección
+                    # Indice 0 -> Obrero 1, Indice 1 -> Obrero 2, etc.
+                    self.player.load_sprites(character_id=self.character_selector.indice_seleccionado + 1)
                     
                     # Selección completada, iniciar juego
                     self.game_state = "EXPLORANDO"
