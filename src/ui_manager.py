@@ -6,6 +6,7 @@ from src.settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, MARRON_FABRICA, AZUL_ELECTRICO, 
     BLANCO_BOTON, NEGRO_TEXTO, COLOR_TIEMPO, COLOR_SUCCESS, COLOR_ERROR
 )
+from src.game_state import GameState
 
 class UIManager:
     def __init__(self, screen):
@@ -118,9 +119,9 @@ class UIManager:
         self.draw_menu_buttons(opciones, botones_rects, selected_option)
 
     def draw_end_screen(self, game_state, opciones=None, botones_rects=None, selected_option=0):
-        if game_state == "PERDIDO":
+        if game_state == GameState.LOST:
             self._render_end_msg("PERDISTE", "Te has quedado encerrado en la fabrica.", COLOR_ERROR, (0, 0, 0))
-        elif game_state == "GANASTE":
+        elif game_state == GameState.WON:
             self._render_end_msg("¡GANASTE!", "Has escapado de la fabrica a tiempo.", COLOR_SUCCESS, (20, 50, 20))
         
         if opciones and botones_rects:
