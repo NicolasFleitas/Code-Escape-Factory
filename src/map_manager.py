@@ -1,6 +1,6 @@
 import pygame
 import os
-from src.settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
+from src.settings import TILE_SIZE
 
 class MapManager:
     def __init__(self):
@@ -11,7 +11,6 @@ class MapManager:
         # Cargar imágenes de los tiles
         self.tiles = {
             "W": self.load_tile("wall.png"),
-            ".": self.load_tile("floor.png"),
             "T": self.load_tile("terminal.png"),
             "D": self.load_tile("door.png"),
             "DO": self.load_tile("door_open.png"), # Puerta abierta
@@ -103,7 +102,8 @@ class MapManager:
 
         
         # Lógica de detección por coordenadas para objetos no-suelo
-        if row in [4, 5, 6]: return "-" # Pasillo
+        if row in [4, 5, 6]:
+            return "-" # Pasillo
         if row < 4:
             return "." if col < 9 else "," # Oficina 1 o 2 (el muro está en col 9)
         if row > 6:
