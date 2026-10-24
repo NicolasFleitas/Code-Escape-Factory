@@ -43,4 +43,7 @@ L4 (evidencia T1): RED observado: `ModuleNotFoundError: No module named 'src.gam
 
 L5: Entrega de T1: PR #26 creado con CI verde ("ruff + pytest" pass en 13s) y squash-mergeado a main como 5cdd087 (rama refactor/scene-architecture borrada). Assessment RDD del commit: risk medium (executable_change en engine.py), review_due false (under_budget), sin review nativo requerido; verificación de la unidad: suite 38 passed + smoke 10/10. Boundary de review avanza a 5cdd087 para los próximos commits.
 
+L6 (2026-10-24, decisión del usuario, verbatim): "y yo creo que uv.lock deberia ser trackeado, asi que metelo y cerramos por ahora y seguimos en la siguiente sesion" — resuelto: uv.lock trackeado vía chore PR. El archivo es un lockfile mínimo de uv (solo requires-python >=3.13, sin paquetes: las dependencias viven en requirements.txt), sin impacto en código ni CI.
+
+
 
