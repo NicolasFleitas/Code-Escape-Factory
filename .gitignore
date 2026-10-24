@@ -1,3 +1,15 @@
 .venv/
+venv/
 __pycache__/
 *.pyc
+
+# Herramientas de desarrollo
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editores y sistema
+.DS_Store
+.idea/
+.vscode/
