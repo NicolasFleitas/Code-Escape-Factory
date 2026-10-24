@@ -34,7 +34,7 @@ Explora la fábrica, encuentra las **4 terminales**, resuelve sus puzles de cód
 ## 🛠️ Instalación y Uso
 
 ### Requisitos Previos
-- Python 3.10 o superior.
+- Python 3.10 a 3.13. `pygame==2.6.1` no publica wheels para Python 3.14, por lo que en 3.14 intenta compilar desde código fuente y falla sin las cabeceras de desarrollo de SDL2.
 - Git.
 
 ### Instalación
@@ -56,6 +56,12 @@ Explora la fábrica, encuentra las **4 terminales**, resuelve sus puzles de cód
 3. **Instala las dependencias:**
    ```bash
    pip install -r requirements.txt
+   ```
+
+   Con `uv` (respeta `.python-version`, que fija Python 3.13):
+   ```bash
+   uv venv
+   uv pip install -r requirements.txt
    ```
 
 ### Ejecución
