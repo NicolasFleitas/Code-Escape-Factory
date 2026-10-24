@@ -1,14 +1,9 @@
 import pygame
 import sys
-import os
-import math
-import random
 
 from src.settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, FPS, COLOR_FONDO,
-    COLOR_DOOR, COLOR_DOOR_OPEN, COLOR_SUCCESS, COLOR_ERROR,
-    COLOR_TIEMPO, TIEMPO_LIMITE, TILE_SIZE,
-    MARRON_FABRICA, AZUL_ELECTRICO, BLANCO_BOTON, NEGRO_TEXTO
+    TIEMPO_LIMITE, TILE_SIZE,
 )
 
 from src.player import Player

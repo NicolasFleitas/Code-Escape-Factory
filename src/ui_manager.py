@@ -24,7 +24,7 @@ class UIManager:
             ruta_fondo = os.path.join("src", "assets", "menu.png")
             self.fondo_menu = pygame.image.load(ruta_fondo).convert()
             self.fondo_menu = pygame.transform.scale(self.fondo_menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
-        except:
+        except Exception:
             self.fondo_menu = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
             self.fondo_menu.fill((30, 30, 35))
 

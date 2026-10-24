@@ -104,10 +104,12 @@ class Player:
         if keys[pygame.K_w] or keys[pygame.K_UP]:
             dy -= PLAYER_SPEED
             # Priorizamos dirección lateral si ya se está moviendo horizontalmente
-            if dx == 0: self.direction = "espalda"
+            if dx == 0:
+                self.direction = "espalda"
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             dy += PLAYER_SPEED
-            if dx == 0: self.direction = "frente"
+            if dx == 0:
+                self.direction = "frente"
             
         self.rect.y += dy
         
