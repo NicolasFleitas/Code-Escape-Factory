@@ -22,7 +22,7 @@ S6 — Pendientes menores (del resumen de sesión anterior, verbatim): "bump de 
 
 | ID | Specs | Route | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| T1 | S1 | inline | done | RED→GREEN pytest 38 passed; ruff clean; smoke headless 10/10; PR #26 squash → main 5cdd087 |
+| T1 | S1 | inline | done | RED→GREEN pytest 38 passed; ruff clean; smoke headless 10/10; PR #26 squash → main 6dcbdc3 |
 | T2 | S2 | inline | pending | — |
 | T3 | S3 | inline | pending | — |
 | T4 | S4 | inline | pending | — |
@@ -41,6 +41,9 @@ L3: Delivery strategy registrada desde la preferencia persistida del usuario (si
 
 L4 (evidencia T1): RED observado: `ModuleNotFoundError: No module named 'src.game_state'` al correr los 25 tests nuevos antes de implementar. GREEN: implementados `src/game_state.py` (GameState enum), `src/scenes/` (base + Menu/CharacterSelect/Playing/Programming/Paused/GameOver), `engine.py` reescrito como loop + router (413→~160 líneas), `ui_manager.draw_end_screen` compara contra `GameState` en vez de magic strings, `sys.exit()` reemplazado por flag `running` (salida limpia del loop, testeable headless). Verificado: `pytest` 38 passed (13 previos + 25 nuevos, todos headless con Rect/Event sintéticos y mixer monkeypatcheado), `ruff check .` limpio, smoke con drivers dummy 10/10 (transiciones reales de todas las escenas, dibujado de las 7 escenas, run() exits tras QUIT). Risk: none (refactor preservando comportamiento, cubierto por tests de transiciones; sin ítems de alto riesgo 1-6).
 
-L5: Entrega de T1: PR #26 creado con CI verde ("ruff + pytest" pass en 13s) y squash-mergeado a main como 5cdd087 (rama refactor/scene-architecture borrada). Assessment RDD del commit: risk medium (executable_change en engine.py), review_due false (under_budget), sin review nativo requerido; verificación de la unidad: suite 38 passed + smoke 10/10. Boundary de review avanza a 5cdd087 para los próximos commits.
+L5: Entrega de T1: PR #26 creado con CI verde ("ruff + pytest" pass en 13s) y squash-mergeado a main como 6dcbdc3 (rama refactor/scene-architecture borrada). Assessment RDD del commit: risk medium (executable_change en engine.py), review_due false (under_budget), sin review nativo requerido; verificación de la unidad: suite 38 passed + smoke 10/10. Boundary de review avanza a 6dcbdc3 para los próximos commits.
+
+L6 (2026-10-24): decisión del usuario: trackear uv.lock en el repositorio. Resuelto vía chore PR #27. El archivo es un lockfile mínimo de uv (solo requires-python >=3.13, sin paquetes: las dependencias viven en requirements.txt), sin impacto en código ni CI.
+
 
 
