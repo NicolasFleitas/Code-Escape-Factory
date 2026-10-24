@@ -54,9 +54,11 @@ chore(ci): correr ruff y pytest en cada pull request
 5. Después del merge se borra la rama, local y remota:
 
 ```bash
-git branch -d feat/mi-rama
+git branch -D feat/mi-rama   # -D: el squash merge no deja los commits como ancestros de main
 git push origin --delete feat/mi-rama
 ```
+
+`-d` falla después de un squash merge porque los commits originales no quedan en el historial de `main`. Si el repositorio tiene activado *Automatically delete head branches*, el borrado remoto es automático y solo queda limpiar la rama local.
 
 Nunca se commitea directo a `main`, salvo una corrección trivial de una línea en documentación.
 
