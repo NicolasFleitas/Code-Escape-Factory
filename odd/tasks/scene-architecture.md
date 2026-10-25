@@ -26,7 +26,7 @@ S6 — Pendientes menores (del resumen de sesión anterior, verbatim): "bump de 
 | T2 | S2 | inline | done | RED→GREEN pytest 62 passed; ruff clean; smoke headless con Game real (150 px en 0,5 s = 300 px/s); diferencial vs 66cdfb5: bloqueo por ejes idéntico, diagonal ahora normalizada (cambio intencional); PR #28 squash → main ef37d0c |
 | T3 | S3 | inline | done | RED→GREEN pytest 83 passed; ruff clean; render pixel a pixel idéntico vs caa446c sobre 1280x768; smoke headless 7 escenas + puerta; PR #29 squash → main 789bde6 |
 | T4 | S4 | inline | done | RED→GREEN pytest 112 passed; ruff clean; diferencial vs 211ecdf (112 respuestas, 0 regresiones, 6 aceptadas nuevas intencionales); smoke headless 4/4; review nativo aprobado (lineage review-4db4e047002d9690); PR #30 squash → main a3ee6a3 |
-| T5 | S5 | inline | pending | — |
+| T5 | S5 | inline | done | RED→GREEN pytest 121 passed; ruff clean; diferencial vs e532044: idéntico desde la raíz del repo, desde cwd ajeno el base perdía fondo de menú y audio; smoke con Game real desde cwd ajeno 7/7 escenas + audio |
 | T6 | S6 | inline | pending | — |
 
 Route notes: ningún Writer trigger aplica (cada tarea es una unidad cohesiva única, sin superficies paralelas); el padre trabaja inline siguiendo este documento.
@@ -82,6 +82,19 @@ L11 (evidencia T4, rama `refactor/puzzle-validators`):
 - Riesgo: ninguno de los ítems 1-6 (refactor interno de validación con tests; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
 
 L12 (entrega T4): PR #30 con CI verde ("ruff + pytest" pass en 11 s) squash-mergeado a main como a3ee6a3; rama `refactor/puzzle-validators` borrada. Assessment RDD del slice 66cdfb5..a3ee6a3: risk high (`process_boundary` en `src/puzzle_validators.py`), review_due true; consentimiento del usuario otorgado y review nativo con lentes readability + reliability aprobado (lineage review-4db4e047002d9690, 2 revisores, autoridad quemada). Sin blockers: 10 hallazgos informativos/advisories, con tres follow-ups accionables fuera del alcance de T4: el renderer identifica la puerta por el símbolo literal `"D"` en vez del rol del loader (`src/map_renderer.py:73`), ramas de error del loader sin test, y `Player.block_left_of` sin test contra el `Player` real. El boundary de review avanza a a3ee6a3. Próximo paso: T5 (módulo único de assets).
+
+L13 (evidencia T5, rama `refactor/asset-paths`):
+
+- RED observado: `ImportError: cannot import name 'asset_paths' from 'src' (unknown location)` al correr los 9 tests nuevos antes de implementar.
+- Diseño: `src/asset_paths.py` es la única fuente de rutas: `ASSETS_DIR = Path(__file__).resolve().parent / "assets"`, los directorios `AUDIO_DIR`, `CHARACTERS_DIR`, `ITEMS_DIR`, `MAPS_DIR` y el helper `asset_path(*parts)`. Consumidores migrados: `audio_manager` (ambiente y efectos), `character_selector` (fondo y retratos), `ui_manager` (fondo del menú), `puzzle_manager` (sonido de error), `player` (sprites, sin duplicar la base con `os.path`), `map_loader` (toma `MAPS_DIR`) y `map_renderer` (toma `ITEMS_DIR`). `generate_assets.py` queda como está a propósito: es el generador one-off que T6 elimina, y ya resolvía desde `__file__`.
+- GREEN: `pytest` 121 passed (112 previos + 9 nuevos), `ruff check .` limpio.
+- Diferencial contra e532044 (copia en `/tmp/opencode`, sin tocar el worktree), en dos cwd distintos: desde la raíz del repo los digests son idénticos en los 21 tiles del mapa, los 4 sprites del jugador, el fondo del menú y los 3 sonidos + música. Desde un cwd ajeno el base fallaba en el fondo del menú (fallback gris) y en todo el audio (`None`); con el módulo nuevo carga todo igual que desde la raíz. El mapa y los sprites ya resolvían por `__file__` en el base, por eso no cambian: el arreglo observable es menú y audio, y es intencional.
+- Smoke headless con el `Game` real desde `/tmp/opencode` (SDL dummy): audio cargado, música sonando, fondo de menú 1280x768 y las 7 escenas dibujan.
+- Riesgo: ninguno de los ítems 1-6 (refactor interno de rutas con tests; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
+
+L14 (entrega T5): PR #31 con CI verde ("ruff + pytest" pass en 13 s) squash-mergeado a main como 6a91f84; rama `refactor/asset-paths` borrada. Assessment RDD del slice a3ee6a3..6a91f84: risk medium (`executable_change` en `src/asset_paths.py`), review_due false (`under_budget`), sin review nativo requerido; el boundary sigue en a3ee6a3 porque el commit queda pendiente dentro del slice. Próximo paso: T6 (pendientes menores).
+
+
 
 
 
