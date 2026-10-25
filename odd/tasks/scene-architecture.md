@@ -24,7 +24,7 @@ S6 — Pendientes menores (del resumen de sesión anterior, verbatim): "bump de 
 | --- | --- | --- | --- | --- |
 | T1 | S1 | inline | done | RED→GREEN pytest 38 passed; ruff clean; smoke headless 10/10; PR #26 squash → main 6dcbdc3 |
 | T2 | S2 | inline | done | RED→GREEN pytest 62 passed; ruff clean; smoke headless con Game real (150 px en 0,5 s = 300 px/s); diferencial vs 66cdfb5: bloqueo por ejes idéntico, diagonal ahora normalizada (cambio intencional); PR #28 squash → main ef37d0c |
-| T3 | S3 | inline | pending | — |
+| T3 | S3 | inline | done | RED→GREEN pytest 83 passed; ruff clean; render pixel a pixel idéntico vs caa446c sobre 1280x768; smoke headless 7 escenas + puerta; PR #29 squash → main 789bde6 |
 | T4 | S4 | inline | pending | — |
 | T5 | S5 | inline | pending | — |
 | T6 | S6 | inline | pending | — |
@@ -56,6 +56,18 @@ L7 (evidencia T2, rama `refactor/player-delta-time`):
 - Riesgo: ninguno de los ítems 1-6 (refactor de movimiento con tests nuevos; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
 
 L8 (entrega T2): PR #28 con CI verde ("ruff + pytest" pass en 12 s) squash-mergeado a main como ef37d0c; rama `refactor/player-delta-time` borrada. Assessment RDD del commit: risk medium (`executable_change` en `engine.py`), review_due false (`under_budget`), sin review nativo requerido. El boundary de review sigue en 66cdfb5 porque los commits under budget quedan pendientes dentro del slice. Próximo paso: T3 (mapas como datos).
+
+L9 (evidencia T3, rama `refactor/map-data`):
+
+- RED observado: `ModuleNotFoundError: No module named 'src.map_loader'` al correr los 21 tests nuevos antes de implementar.
+- Diseño: `src/assets/maps/factory.json` declara dos capas (`floor` y `objects`) más una `legend` por símbolo (image, solid, terminal, door, spawn) y `door_open_image`. `src/map_loader.py` valida rectangularidad, símbolos declarados, roles únicos y deriva muros, terminales, puerta y spawn; `src/map_renderer.py` carga 21 tiles y dibuja primero el suelo y después los objetos. `MapManager` se elimina: también la inferencia de suelo por coordenadas (`_get_floor_type`) y la clave `"."` duplicada.
+- Resolución 768 vs 720: el mapa es 20x12 tiles de 64 px = 1280x768. `SCREEN_HEIGHT` pasa a 768 para que el canvas coincida con el mundo completo (con `FULLSCREEN | SCALED` el letterboxing lo resuelve cada display); `test_map_fits_the_screen` fija el invariante que antes fallaba.
+- GREEN: `pytest` 83 passed (62 previos + 21 nuevos), `ruff check .` limpio.
+- Diferencial contra caa446c (copia temporal en `mktemp -d`, sin tocar el worktree): render pixel a pixel idéntico sobre 1280x768; muros (110), terminales (4), puerta (1216, 320) y spawn (576, 320) idénticos al MapManager viejo.
+- Smoke headless con el `Game` real y drivers dummy: las 7 escenas dibujan, 150 px en 0,5 s, la puerta cerrada bloquea y la puerta abierta lleva a WON.
+- Riesgo: ninguno de los ítems 1-6 (refactor interno con datos nuevos, tests y validación; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
+
+L10 (entrega T3): PR #29 con CI verde ("ruff + pytest" pass en 11 s) squash-mergeado a main como 789bde6; rama `refactor/map-data` borrada. Assessment RDD del slice 66cdfb5..789bde6: risk medium (`configuration_change` en `src/assets/maps/factory.json`), review_due false (`under_budget`), sin review nativo requerido; el boundary sigue en 66cdfb5. Próximo paso: T4 (puzzles por strategy/validator).
 
 
 
