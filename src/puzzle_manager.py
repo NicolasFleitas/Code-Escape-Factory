@@ -1,13 +1,14 @@
 import pygame
 import os
 from src.settings import COLOR_SUCCESS, COLOR_TEXTO, COLOR_ERROR
+from src.puzzle_validators import build_validator
 from src.puzzles import CATALOGO_PUZZLES  # Importamos el catálogo
 
 
 class PuzzleManager:
     def __init__(self):
         self.input_text = ""
-        self.target_code = ""
+        self.validator = None
         self.instruction = ""
         self.pista = ""
         self.manual_pista = False # Nueva bandera para mostrar pista con H
@@ -31,7 +32,7 @@ class PuzzleManager:
         if puzzle_data:
             self.instruction = puzzle_data["instruccion"]
             self.pista = puzzle_data.get("pista", "")
-            self.target_code = puzzle_data["solucion"]
+            self.validator = build_validator(puzzle_data)
             self.input_text = ""
             self.manual_pista = False
             self.is_solved = False
@@ -43,7 +44,7 @@ class PuzzleManager:
             if event.key == pygame.K_BACKSPACE:
                 self.input_text = self.input_text[:-1]
             elif event.key == pygame.K_RETURN:
-                if self.input_text.strip() == self.target_code:
+                if self.validator is not None and self.validator.validate(self.input_text):
                     self.is_solved = True
                     self.show_error = False
                     return "SOLVED"
