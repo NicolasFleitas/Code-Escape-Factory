@@ -3,14 +3,15 @@
 import pygame
 
 from src.settings import (
-    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, MAX_DELTA_TIME, TIEMPO_LIMITE, TILE_SIZE,
+    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, MAX_DELTA_TIME, TIEMPO_LIMITE,
 )
 
 from src.player import Player
 from src.input_adapter import InputAdapter
 from src.terminal import Terminal
 from src.puzzle_manager import PuzzleManager
-from src.map_manager import MapManager
+from src.map_loader import load_map
+from src.map_renderer import MapRenderer
 from src.audio_manager import AudioManager
 from src.ui_manager import UIManager
 from src.character_selector import CharacterSelector
@@ -44,7 +45,8 @@ class Game:
         self.audio_manager.setup()
 
         self.ui_manager = UIManager(self.screen)
-        self.map_manager = MapManager()
+        self.map_data = load_map()
+        self.map_renderer = MapRenderer(self.map_data)
         self.puzzle = PuzzleManager()
         self.character_selector = CharacterSelector(self.screen)
         self.input = InputAdapter()
@@ -65,16 +67,17 @@ class Game:
 
     def _setup_entities(self):
         self.player = Player(
-            x=self.map_manager.player_spawn[0], y=self.map_manager.player_spawn[1]
+            x=self.map_data.player_spawn[0], y=self.map_data.player_spawn[1]
         )
         self.terminals = [
             Terminal(pos[0], pos[1], task_id=i + 1)
-            for i, pos in enumerate(self.map_manager.terminals)
+            for i, pos in enumerate(self.map_data.terminals)
         ]
         self.active_terminal = None
+        tile_size = self.map_data.tile_size
         self.door_rect = pygame.Rect(
-            self.map_manager.door_pos[0], self.map_manager.door_pos[1],
-            TILE_SIZE, TILE_SIZE,
+            self.map_data.door_pos[0], self.map_data.door_pos[1],
+            tile_size, tile_size,
         )
         self.puerta_abierta = False
 

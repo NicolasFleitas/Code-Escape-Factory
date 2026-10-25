@@ -75,7 +75,7 @@ Muestra el mensaje de éxito o fracaso.
     *   Sonidos específicos para Error, Victoria y Derrota con manejo de hilos para no bloquear el juego.
 
 2.  **Sistema de Colisiones**:
-    *   El `MapManager` define muros y objetos sólidos (Desktop, Tanques, Buzones, etc.) con los que el jugador no puede atravesar.
+    *   El `MapLoader` (`src/map_loader.py`) lee el layout desde `src/assets/maps/factory.json` y deriva los muros y objetos sólidos (Desktop, Tanques, Buzones, etc.) con los que el jugador no puede atravesar. El `MapRenderer` solo dibuja esas capas.
     *   La puerta es un objeto sólido infranqueable hasta que se completan todas las misiones.
 
 3.  **UI Dinámica**:

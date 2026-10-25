@@ -74,6 +74,9 @@ class FakePlayer:
     def block_left_of(self, blocker):
         self.rect.right = blocker.left
 
+    def draw(self, screen):
+        pass
+
 
 class FakeInput:
     """Stands in for the input adapter: fixed direction, zero pygame access."""
@@ -129,12 +132,30 @@ class FakeScreen:
         pass
 
 
+class FakeMapRenderer:
+    """Stands in for the map renderer: records draws and door tile requests."""
+
+    def __init__(self):
+        self.draws = 0
+        self.door_requests = []
+
+    def draw(self, screen):
+        self.draws += 1
+
+    def door_tile(self, is_open):
+        self.door_requests.append(is_open)
+        return None
+
+
 class FakeUIManager:
     def __init__(self):
         self.end_screen_states = []
 
     def draw_end_screen(self, game_state, **kwargs):
         self.end_screen_states.append(game_state)
+
+    def draw_gameplay_ui(self, tiempo_restante, terminals):
+        pass
 
 
 class FakeGame:
@@ -151,7 +172,8 @@ class FakeGame:
         self.audio_manager = FakeAudioManager()
         self.player = FakePlayer()
         self.input = FakeInput()
-        self.map_manager = SimpleNamespace(walls=[], draw=lambda screen: None)
+        self.map_data = SimpleNamespace(walls=[])
+        self.map_renderer = FakeMapRenderer()
         self.puzzle = FakePuzzle()
         self.character_selector = FakeSelector()
         self.ui_manager = FakeUIManager()
@@ -348,7 +370,7 @@ def test_playing_timer_does_not_run_before_the_run_starts():
 
     assert game.transitions == []
     assert game.tiempo_restante == TIEMPO_LIMITE
-    assert game.player.update_calls == [(0, (0, 0), game.map_manager.walls)]
+    assert game.player.update_calls == [(0, (0, 0), game.map_data.walls)]
 
 
 def test_playing_passes_delta_time_and_direction_to_the_player():
@@ -359,7 +381,19 @@ def test_playing_passes_delta_time_and_direction_to_the_player():
     scene.update(0.25)
 
     assert game.input.calls == 1
-    assert game.player.update_calls == [(0.25, (1, -1), game.map_manager.walls)]
+    assert game.player.update_calls == [(0.25, (1, -1), game.map_data.walls)]
+
+
+def test_playing_draw_uses_the_map_renderer_and_the_door_state():
+    game = FakeGame()
+    scene = PlayingScene(game)
+
+    scene.draw()
+    game.puerta_abierta = True
+    scene.draw()
+
+    assert game.map_renderer.draws == 2
+    assert game.map_renderer.door_requests == [False, True]
 
 
 def test_playing_alarm_at_10s_plays_once(monkeypatch):

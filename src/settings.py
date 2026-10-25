@@ -1,6 +1,9 @@
 # Configuraciones básicas del juego
 SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
+# The factory map is 20x12 tiles at 64px, so the canvas matches it exactly
+# (see src/assets/maps/factory.json). FULLSCREEN | SCALED letterboxes it on
+# displays with another aspect ratio.
+SCREEN_HEIGHT = 768
 FPS = 60
 TILE_SIZE = 64
 
