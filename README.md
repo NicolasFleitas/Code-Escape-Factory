@@ -86,6 +86,7 @@ Code-Escape-Factory/
 ├── requirements.txt        # Dependencias del proyecto
 ├── src/
 │   ├── assets/             # Recursos visuales y de audio
+│   ├── asset_paths.py      # Única fuente de rutas de assets (pathlib desde __file__)
 │   ├── engine.py           # Núcleo del juego y gestión de estados
 │   ├── map_loader.py       # Carga los mapas JSON y deriva muros y entidades
 │   ├── map_renderer.py     # Dibuja las capas del mapa con tiles

@@ -15,9 +15,9 @@ from pathlib import Path
 
 import pygame
 
+from src.asset_paths import ITEMS_DIR
 from src.map_loader import MapData
 
-ITEMS_DIR = Path(__file__).resolve().parent / "assets" / "items_mapa"
 _MISSING_TILE_COLOR = (255, 0, 255)
 
 

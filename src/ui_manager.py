@@ -1,7 +1,7 @@
 import pygame
 import math
 import random
-import os
+from src.asset_paths import asset_path
 from src.settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, MARRON_FABRICA, AZUL_ELECTRICO, 
     BLANCO_BOTON, NEGRO_TEXTO, COLOR_TIEMPO, COLOR_SUCCESS, COLOR_ERROR
@@ -22,7 +22,7 @@ class UIManager:
 
     def _setup_assets(self):
         try:
-            ruta_fondo = os.path.join("src", "assets", "menu.png")
+            ruta_fondo = asset_path("menu.png")
             self.fondo_menu = pygame.image.load(ruta_fondo).convert()
             self.fondo_menu = pygame.transform.scale(self.fondo_menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
         except Exception:

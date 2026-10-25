@@ -1,5 +1,5 @@
 import pygame
-import os
+from src.asset_paths import asset_path
 from src.settings import COLOR_SUCCESS, COLOR_TEXTO, COLOR_ERROR
 from src.puzzle_validators import build_validator
 from src.puzzles import CATALOGO_PUZZLES  # Importamos el catálogo
@@ -19,7 +19,7 @@ class PuzzleManager:
         
         # Cargar sonido de error
         try:
-            ruta_error = os.path.join("src", "assets", "audio", "error.mp3")
+            ruta_error = asset_path("audio", "error.mp3")
             self.error_sound = pygame.mixer.Sound(ruta_error)
             self.error_sound.set_volume(0.5)  # Volumen al 50%
         except Exception as e:
