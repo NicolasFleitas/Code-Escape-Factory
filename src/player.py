@@ -40,10 +40,6 @@ class Player:
         # Cargar Sprites (por defecto obrero 1)
         self.sprites = {}
         self.load_sprites(character_id=1)
-        
-        # Sprite personalizado (si se selecciona uno diferente al default)
-        self.custom_sprite = None
-
 
     def load_sprites(self, character_id=1):
         try:
@@ -74,21 +70,6 @@ class Player:
             surface.fill(COLOR_PLAYER)
             self.sprites = {"frente": surface, "espalda": surface, "izquierda": surface, "derecha": surface}
             self.image = surface
-            
-    def set_custom_sprite(self, image):
-        """Establece un sprite personalizado único para todas las direcciones (o base)"""
-        if image:
-            # Escalar al tamaño correcto si es necesario
-            if image.get_size() != (PLAYER_SIZE, PLAYER_SIZE):
-                image = pygame.transform.scale(image, (PLAYER_SIZE, PLAYER_SIZE))
-            
-            self.custom_sprite = image
-            # Actualizamos direcciones básicas con este sprite
-            self.sprites["frente"] = image
-            self.sprites["espalda"] = image
-            self.sprites["derecha"] = image
-            self.sprites["izquierda"] = pygame.transform.flip(image, True, False)
-            self.image = image
 
     def update(self, dt, direction=(0, 0), walls=()):
         """Move the player for ``dt`` seconds toward ``direction``.
