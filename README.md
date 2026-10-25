@@ -87,7 +87,8 @@ Code-Escape-Factory/
 ├── src/
 │   ├── assets/             # Recursos visuales y de audio
 │   ├── engine.py           # Núcleo del juego y gestión de estados
-│   ├── map_manager.py      # Lógica de renderizado de mapas y colisiones
+│   ├── map_loader.py       # Carga los mapas JSON y deriva muros y entidades
+│   ├── map_renderer.py     # Dibuja las capas del mapa con tiles
 │   ├── player.py           # Entidad del jugador y animaciones
 │   ├── input_adapter.py    # Adaptador de teclado: dirección de movimiento
 │   ├── ui_manager.py       # Gestión de la interfaz de usuario

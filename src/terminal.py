@@ -26,7 +26,7 @@ class Terminal:
         return dist < INTERACTION_DISTANCE
 
     def draw(self, surface, player_rect):
-        # surface.blit(self.image, self.rect) # Ya se dibuja en el MapManager
+        # surface.blit(self.image, self.rect) # The map renderer already draws it
 
         # Si el jugador está cerca, dibujar un "indicador" de interacción
         if self.is_player_near(player_rect):

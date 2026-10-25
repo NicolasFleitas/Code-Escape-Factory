@@ -75,14 +75,12 @@ class BaseScene:
         """Draw the background color and the map."""
         game = self.game
         game.screen.fill(COLOR_FONDO)
-        game.map_manager.draw(game.screen)
+        game.map_renderer.draw(game.screen)
 
     def _draw_gameplay(self):
         """Draw the door, terminals, player, and the gameplay UI."""
         game = self.game
-        door_tile = (
-            game.map_manager.tiles["DO"] if game.puerta_abierta else game.map_manager.tiles["D"]
-        )
+        door_tile = game.map_renderer.door_tile(game.puerta_abierta)
         game.screen.blit(door_tile, game.door_rect)
 
         for terminal in game.terminals:
