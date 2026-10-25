@@ -25,7 +25,7 @@ S6 — Pendientes menores (del resumen de sesión anterior, verbatim): "bump de 
 | T1 | S1 | inline | done | RED→GREEN pytest 38 passed; ruff clean; smoke headless 10/10; PR #26 squash → main 6dcbdc3 |
 | T2 | S2 | inline | done | RED→GREEN pytest 62 passed; ruff clean; smoke headless con Game real (150 px en 0,5 s = 300 px/s); diferencial vs 66cdfb5: bloqueo por ejes idéntico, diagonal ahora normalizada (cambio intencional); PR #28 squash → main ef37d0c |
 | T3 | S3 | inline | done | RED→GREEN pytest 83 passed; ruff clean; render pixel a pixel idéntico vs caa446c sobre 1280x768; smoke headless 7 escenas + puerta; PR #29 squash → main 789bde6 |
-| T4 | S4 | inline | pending | — |
+| T4 | S4 | inline | done | RED→GREEN pytest 112 passed; ruff clean; diferencial vs 211ecdf (112 respuestas, 0 regresiones, 6 aceptadas nuevas intencionales); smoke headless 4/4; review nativo aprobado (lineage review-4db4e047002d9690); PR #30 squash → main a3ee6a3 |
 | T5 | S5 | inline | pending | — |
 | T6 | S6 | inline | pending | — |
 
@@ -68,6 +68,21 @@ L9 (evidencia T3, rama `refactor/map-data`):
 - Riesgo: ninguno de los ítems 1-6 (refactor interno con datos nuevos, tests y validación; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
 
 L10 (entrega T3): PR #29 con CI verde ("ruff + pytest" pass en 11 s) squash-mergeado a main como 789bde6; rama `refactor/map-data` borrada. Assessment RDD del slice 66cdfb5..789bde6: risk medium (`configuration_change` en `src/assets/maps/factory.json`), review_due false (`under_budget`), sin review nativo requerido; el boundary sigue en 66cdfb5. Próximo paso: T4 (puzzles por strategy/validator).
+
+L11 (evidencia T4, rama `refactor/puzzle-validators`):
+
+- RED observado: `ModuleNotFoundError: No module named 'src.puzzle_validators'` al correr los 29 tests nuevos antes de implementar.
+- Diseño: `src/puzzle_validators.py` define la interfaz `PuzzleValidator` y dos estrategias: `ExactTextValidator` (texto canónico sin espacios alrededor, fallback del catálogo) y `PythonAssignmentValidator` (parsea con `ast` una única sentencia `nombre = literal` y compara nombre, valor y tipo; tolera espacios, comentarios y comillas simples/dobles, y rechaza expresiones, sentencias extra y confusión bool/int). `build_validator(puzzle)` arma la estrategia que declara el catálogo y falla ante un tipo desconocido.
+- `src/puzzles.py`: cada puzzle declara `validator: "python_assignment"`; `solucion` sigue siendo la respuesta canónica que el validador parsea (sin duplicar la expectativa).
+- `src/puzzle_manager.py`: `set_puzzle` construye el validador y `handle_event` delega el veredicto (`self.validator.validate(self.input_text)`); sin validador cargado no se puede resolver (antes, RETURN sin puzzle cargado resolvía por comparación con string vacío).
+- Alcance: el split `PuzzleSession`/`PuzzleView` que menciona el paso 4 del roadmap no está en el texto citado de S4, así que queda fuera de esta tarea.
+- GREEN: `pytest` 112 passed (83 previos + 29 nuevos), `ruff check .` limpio.
+- Diferencial contra 211ecdf (catálogo base extraído en copia temporal fuera del worktree, sin tocar el worktree) sobre 112 respuestas: ninguna respuesta antes aceptada se rechaza ahora; 6 pasan a aceptarse (`puerta=True`, espacios múltiples, `energia = 100  # ok`, `codigo=1234`, `ventilacion = "ON"`), cambio intencional de la estrategia. Valores incorrectos, variables equivocadas, expresiones y sentencias extra siguen rechazados.
+- Smoke headless con el `PuzzleManager` real (SDL dummy): los 4 puzzles se resuelven, la variante sin espacios también, y `draw()` no falla.
+- Riesgo: ninguno de los ítems 1-6 (refactor interno de validación con tests; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
+
+L12 (entrega T4): PR #30 con CI verde ("ruff + pytest" pass en 11 s) squash-mergeado a main como a3ee6a3; rama `refactor/puzzle-validators` borrada. Assessment RDD del slice 66cdfb5..a3ee6a3: risk high (`process_boundary` en `src/puzzle_validators.py`), review_due true; consentimiento del usuario otorgado y review nativo con lentes readability + reliability aprobado (lineage review-4db4e047002d9690, 2 revisores, autoridad quemada). Sin blockers: 10 hallazgos informativos/advisories, con tres follow-ups accionables fuera del alcance de T4: el renderer identifica la puerta por el símbolo literal `"D"` en vez del rol del loader (`src/map_renderer.py:73`), ramas de error del loader sin test, y `Player.block_left_of` sin test contra el `Player` real. El boundary de review avanza a a3ee6a3. Próximo paso: T5 (módulo único de assets).
+
 
 
 
