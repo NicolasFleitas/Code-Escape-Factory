@@ -23,7 +23,7 @@ S6 — Pendientes menores (del resumen de sesión anterior, verbatim): "bump de 
 | ID | Specs | Route | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | T1 | S1 | inline | done | RED→GREEN pytest 38 passed; ruff clean; smoke headless 10/10; PR #26 squash → main 6dcbdc3 |
-| T2 | S2 | inline | pending | — |
+| T2 | S2 | inline | done | RED→GREEN pytest 62 passed; ruff clean; smoke headless con Game real (150 px en 0,5 s = 300 px/s); diferencial vs 66cdfb5: bloqueo por ejes idéntico, diagonal ahora normalizada (cambio intencional) |
 | T3 | S3 | inline | pending | — |
 | T4 | S4 | inline | pending | — |
 | T5 | S5 | inline | pending | — |
@@ -44,6 +44,16 @@ L4 (evidencia T1): RED observado: `ModuleNotFoundError: No module named 'src.gam
 L5: Entrega de T1: PR #26 creado con CI verde ("ruff + pytest" pass en 13s) y squash-mergeado a main como 6dcbdc3 (rama refactor/scene-architecture borrada). Assessment RDD del commit: risk medium (executable_change en engine.py), review_due false (under_budget), sin review nativo requerido; verificación de la unidad: suite 38 passed + smoke 10/10. Boundary de review avanza a 6dcbdc3 para los próximos commits.
 
 L6 (2026-10-24): decisión del usuario: trackear uv.lock en el repositorio. Resuelto vía chore PR #27. El archivo es un lockfile mínimo de uv (solo requires-python >=3.13, sin paquetes: las dependencias viven en requirements.txt), sin impacto en código ni CI.
+
+L7 (evidencia T2, rama `refactor/player-delta-time`):
+
+- RED observado: `ModuleNotFoundError: No module named 'src.input_adapter'`, `ImportError: cannot import name 'clamp_delta_time'` y 13 fallos en `tests/test_player.py` (TypeError por la firma vieja `update(walls)`; un caso con `pygame.error`), más 2 fallos en `tests/test_scenes.py` (la escena no pasaba dt ni dirección). Un test extra de velocidad diagonal a 60 FPS falló con 339 px recorridos contra 300 esperados, lo que expuso un truncamiento de la posición flotante.
+- Diseño: `src/input_adapter.py` es el único módulo que lee `pygame.key`; `read_movement_direction(keys)` es una función pura (ejes en -1/0/1, teclas opuestas se cancelan, flechas y WASD equivalen) e `InputAdapter` se inyecta en `Game` (`game.input`), igual que el resto de las dependencias. `PlayingScene.update(dt)` lee la dirección una vez por frame y llama `player.update(dt, direccion, walls)`.
+- `Player.update(dt, direction=(0, 0), walls=())`: la velocidad pasa a píxeles por segundo (`PLAYER_SPEED = 300.0`, equivale a los 5 px/frame previos a 60 FPS). La posición real se guarda en un `Vector2` flotante y el `pygame.Rect` la refleja redondeada, así los pasos fraccionarios no se pierden. Los pasos se subdividen en tramos de `PLAYER_SIZE / 2` para que un frame largo no atraviese una pared. La dirección diagonal se normaliza y el eje horizontal conserva la prioridad de orientación. `block_left_of(blocker)` reemplaza la asignación directa de `rect.right` en la escena, manteniendo sincronizada la posición flotante.
+- `clamp_delta_time(dt)` en `engine.py` limita el delta de cada frame a `MAX_DELTA_TIME = 0.05` s para que un stall (arrastre de ventana, breakpoint) no teletransporte al jugador.
+- GREEN: `pytest` 62 passed (38 previos + 24 nuevos), `ruff check .` limpio. Smoke headless con el `Game` real y un input con guion: 150 px en 0,5 s hacia la derecha, dirección `derecha`, sin movimiento con dirección neutra; `draw()` sin excepciones.
+- Diferencial contra 66cdfb5 (copia en directorio temporal, sin tocar el worktree): movimiento y bloqueo horizontal/vertical idénticos (160/160/64 px); la diagonal en espacio abierto pasa de 5 px por eje por frame (353 px/s) a 300 px/s normalizados. Es el único cambio observable y es intencional: la diagonal ya no es más rápida que la recta.
+- Riesgo: ninguno de los ítems 1-6 (refactor de movimiento con tests nuevos; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
 
 
 

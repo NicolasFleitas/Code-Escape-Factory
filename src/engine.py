@@ -3,10 +3,11 @@
 import pygame
 
 from src.settings import (
-    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TIEMPO_LIMITE, TILE_SIZE,
+    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, MAX_DELTA_TIME, TIEMPO_LIMITE, TILE_SIZE,
 )
 
 from src.player import Player
+from src.input_adapter import InputAdapter
 from src.terminal import Terminal
 from src.puzzle_manager import PuzzleManager
 from src.map_manager import MapManager
@@ -21,6 +22,11 @@ from src.scenes.menu import MenuScene
 from src.scenes.paused import PausedScene
 from src.scenes.playing import PlayingScene
 from src.scenes.programming import ProgrammingScene
+
+
+def clamp_delta_time(dt):
+    """Cap one frame's delta so a long stall cannot tunnel through a wall."""
+    return min(dt, MAX_DELTA_TIME)
 
 
 class Game:
@@ -41,6 +47,7 @@ class Game:
         self.map_manager = MapManager()
         self.puzzle = PuzzleManager()
         self.character_selector = CharacterSelector(self.screen)
+        self.input = InputAdapter()
 
         self._setup_entities()
         self._setup_session_state()
@@ -123,7 +130,7 @@ class Game:
 
     def run(self):
         while self.running:
-            dt = self.clock.tick(FPS) / 1000.0
+            dt = clamp_delta_time(self.clock.tick(FPS) / 1000.0)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

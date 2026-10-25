@@ -30,11 +30,11 @@ class PlayingScene(BaseScene):
         if game.state is not GameState.PLAYING:
             return
 
-        game.player.update(game.map_manager.walls)
+        game.player.update(dt, game.input.movement_direction(), game.map_manager.walls)
 
         if not game.puerta_abierta:
             if game.player.rect.colliderect(game.door_rect):
-                game.player.rect.right = game.door_rect.left
+                game.player.block_left_of(game.door_rect)
         else:
             if game.player.rect.colliderect(game.door_rect):
                 game.change_state(GameState.WON)
