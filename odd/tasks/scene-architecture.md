@@ -27,7 +27,7 @@ S6 — Pendientes menores (del resumen de sesión anterior, verbatim): "bump de 
 | T3 | S3 | inline | done | RED→GREEN pytest 83 passed; ruff clean; render pixel a pixel idéntico vs caa446c sobre 1280x768; smoke headless 7 escenas + puerta; PR #29 squash → main 789bde6 |
 | T4 | S4 | inline | done | RED→GREEN pytest 112 passed; ruff clean; diferencial vs 211ecdf (112 respuestas, 0 regresiones, 6 aceptadas nuevas intencionales); smoke headless 4/4; review nativo aprobado (lineage review-4db4e047002d9690); PR #30 squash → main a3ee6a3 |
 | T5 | S5 | inline | done | RED→GREEN pytest 121 passed; ruff clean; diferencial vs e532044: idéntico desde la raíz del repo, desde cwd ajeno el base perdía fondo de menú y audio; smoke con Game real desde cwd ajeno 7/7 escenas + audio |
-| T6 | S6 | inline | pending | — |
+| T6 | S6 | inline | done | RED no aplicable (solo eliminación); grep de referencias = 0; pytest 121 passed; ruff clean; smoke headless desde cwd ajeno 7/7 escenas + audio; PR #32 squash → main 09ef9d3 |
 
 Route notes: ningún Writer trigger aplica (cada tarea es una unidad cohesiva única, sin superficies paralelas); el padre trabaja inline siguiendo este documento.
 
@@ -93,6 +93,17 @@ L13 (evidencia T5, rama `refactor/asset-paths`):
 - Riesgo: ninguno de los ítems 1-6 (refactor interno de rutas con tests; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
 
 L14 (entrega T5): PR #31 con CI verde ("ruff + pytest" pass en 13 s) squash-mergeado a main como 6a91f84; rama `refactor/asset-paths` borrada. Assessment RDD del slice a3ee6a3..6a91f84: risk medium (`executable_change` en `src/asset_paths.py`), review_due false (`under_budget`), sin review nativo requerido; el boundary sigue en a3ee6a3 porque el commit queda pendiente dentro del slice. Próximo paso: T6 (pendientes menores).
+
+L15 (evidencia T6, rama `chore/pending-cleanups`):
+
+- CI: `.github/workflows/ci.yml` ya usa `actions/checkout@v4` y `actions/setup-python@v5` desde el PR #24 (commit a8b90b7); el bump pedido en S6 ya estaba aplicado y el workflow no cambia en esta tarea.
+- Código muerto eliminado: `Player.set_custom_sprite` y el atributo `custom_sprite` (sin ninguna llamada en `src/` ni `tests/`); `AudioManager.handle_alarms` (las alarmas viven en `PlayingScene`/`Game` desde T1) junto con los seis flags de audio (`victoria_sound_played`, `victoria_sound_start_time`, `derrota_sound_played`, `derrota_sound_start_time`, `alarma_10s_played`, `alarma_5s_played`), que duplicaban el estado que ya es dueño `Game` (CONTRIBUTING §6) y solo se leían dentro del método borrado; `src/generate_assets.py` (generador one-off; los 43 assets están versionados).
+- `MapManager.draw_debug` no existe en el árbol actual: `MapManager` se eliminó en T3 (L9), verificado por grep además de `MapManager`.
+- Docs: se retira del README la sección "Generación de Assets" y la línea del árbol de archivos que mencionaba el script, en el mismo commit (CONTRIBUTING §5).
+- Test-first: excepción documentada. No hay comportamiento nuevo que pueda fallar en RED: la tarea es eliminación de código sin llamadas y de un script sin tests. Verificación estructural: `grep -rn "set_custom_sprite|custom_sprite|handle_alarms|generate_assets|MapManager|draw_debug"` sobre `*.py`, `*.md`, `*.yml` y `*.toml` devuelve 0 coincidencias fuera del documento de feature.
+- GREEN: `pytest` 121 passed (los mismos 121 de T5; ningún test dependía del código eliminado, incluido `test_playing_alarm_at_10s_plays_once`, que fija que la alarma sigue sonando desde la escena), `ruff check .` limpio.
+- Smoke headless con el `Game` real desde `/tmp/opencode` (SDL dummy): audio cargado (victoria, derrota, alarma), las 7 escenas actualizan y dibujan, el jugador se mueve 150 px en 0,5 s, y `custom_sprite`/`handle_alarms`/`alarma_10s_played` ya no existen en `Player`/`AudioManager`.
+- Riesgo: ninguno de los ítems 1-6 (eliminación de código muerto y docs; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
 
 
 
