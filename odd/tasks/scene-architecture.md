@@ -23,7 +23,7 @@ S6 — Pendientes menores (del resumen de sesión anterior, verbatim): "bump de 
 | ID | Specs | Route | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | T1 | S1 | inline | done | RED→GREEN pytest 38 passed; ruff clean; smoke headless 10/10; PR #26 squash → main 6dcbdc3 |
-| T2 | S2 | inline | done | RED→GREEN pytest 62 passed; ruff clean; smoke headless con Game real (150 px en 0,5 s = 300 px/s); diferencial vs 66cdfb5: bloqueo por ejes idéntico, diagonal ahora normalizada (cambio intencional) |
+| T2 | S2 | inline | done | RED→GREEN pytest 62 passed; ruff clean; smoke headless con Game real (150 px en 0,5 s = 300 px/s); diferencial vs 66cdfb5: bloqueo por ejes idéntico, diagonal ahora normalizada (cambio intencional); PR #28 squash → main ef37d0c |
 | T3 | S3 | inline | pending | — |
 | T4 | S4 | inline | pending | — |
 | T5 | S5 | inline | pending | — |
@@ -54,6 +54,8 @@ L7 (evidencia T2, rama `refactor/player-delta-time`):
 - GREEN: `pytest` 62 passed (38 previos + 24 nuevos), `ruff check .` limpio. Smoke headless con el `Game` real y un input con guion: 150 px en 0,5 s hacia la derecha, dirección `derecha`, sin movimiento con dirección neutra; `draw()` sin excepciones.
 - Diferencial contra 66cdfb5 (copia en directorio temporal, sin tocar el worktree): movimiento y bloqueo horizontal/vertical idénticos (160/160/64 px); la diagonal en espacio abierto pasa de 5 px por eje por frame (353 px/s) a 300 px/s normalizados. Es el único cambio observable y es intencional: la diagonal ya no es más rápida que la recta.
 - Riesgo: ninguno de los ítems 1-6 (refactor de movimiento con tests nuevos; sin datos persistidos, seguridad, contratos públicos, concurrencia ni delivery).
+
+L8 (entrega T2): PR #28 con CI verde ("ruff + pytest" pass en 12 s) squash-mergeado a main como ef37d0c; rama `refactor/player-delta-time` borrada. Assessment RDD del commit: risk medium (`executable_change` en `engine.py`), review_due false (`under_budget`), sin review nativo requerido. El boundary de review sigue en 66cdfb5 porque los commits under budget quedan pendientes dentro del slice. Próximo paso: T3 (mapas como datos).
 
 
 
