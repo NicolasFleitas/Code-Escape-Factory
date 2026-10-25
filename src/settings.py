@@ -18,10 +18,14 @@ COLOR_SUCCESS = (50, 255, 50)  # Verde para éxito
 COLOR_ERROR = (255, 50, 50)  # Rojo para errores/muerte
 
 # --- Propiedades de Entidades ---
-PLAYER_SPEED = 5
+PLAYER_SPEED = 300.0  # pixels per second; movement is scaled by delta time
 PLAYER_SIZE = 40
 TERMINAL_SIZE = 60
 INTERACTION_DISTANCE = 100
+
+# Longest delta a frame may report, in seconds. Caps a stall (window drag,
+# breakpoint) so one huge step cannot tunnel through a wall.
+MAX_DELTA_TIME = 0.05
 
 # --- Lógica de Juego ---
 TIEMPO_LIMITE = 60  # 10 segundos para pruebas

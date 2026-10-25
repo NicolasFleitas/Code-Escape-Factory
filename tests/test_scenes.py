@@ -68,8 +68,23 @@ class FakePlayer:
     def load_sprites(self, character_id=1):
         self.load_calls.append(character_id)
 
-    def update(self, walls=None):
-        self.update_calls.append(walls)
+    def update(self, dt, direction=(0, 0), walls=None):
+        self.update_calls.append((dt, direction, walls))
+
+    def block_left_of(self, blocker):
+        self.rect.right = blocker.left
+
+
+class FakeInput:
+    """Stands in for the input adapter: fixed direction, zero pygame access."""
+
+    def __init__(self, direction=(0, 0)):
+        self.direction = direction
+        self.calls = 0
+
+    def movement_direction(self):
+        self.calls += 1
+        return self.direction
 
 
 class FakeTerminal:
@@ -135,6 +150,7 @@ class FakeGame:
 
         self.audio_manager = FakeAudioManager()
         self.player = FakePlayer()
+        self.input = FakeInput()
         self.map_manager = SimpleNamespace(walls=[], draw=lambda screen: None)
         self.puzzle = FakePuzzle()
         self.character_selector = FakeSelector()
@@ -332,7 +348,18 @@ def test_playing_timer_does_not_run_before_the_run_starts():
 
     assert game.transitions == []
     assert game.tiempo_restante == TIEMPO_LIMITE
-    assert game.player.update_calls == [game.map_manager.walls]
+    assert game.player.update_calls == [(0, (0, 0), game.map_manager.walls)]
+
+
+def test_playing_passes_delta_time_and_direction_to_the_player():
+    game = FakeGame()
+    game.input.direction = (1, -1)
+    scene = PlayingScene(game)
+
+    scene.update(0.25)
+
+    assert game.input.calls == 1
+    assert game.player.update_calls == [(0.25, (1, -1), game.map_manager.walls)]
 
 
 def test_playing_alarm_at_10s_plays_once(monkeypatch):

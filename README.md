@@ -89,6 +89,7 @@ Code-Escape-Factory/
 │   ├── engine.py           # Núcleo del juego y gestión de estados
 │   ├── map_manager.py      # Lógica de renderizado de mapas y colisiones
 │   ├── player.py           # Entidad del jugador y animaciones
+│   ├── input_adapter.py    # Adaptador de teclado: dirección de movimiento
 │   ├── ui_manager.py       # Gestión de la interfaz de usuario
 │   ├── puzzle_manager.py   # Lógica de los terminales y puzles
 │   ├── puzzles.py          # Catálogo de desafíos de código
