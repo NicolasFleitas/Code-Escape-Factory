@@ -70,12 +70,6 @@ Para iniciar el juego:
 python main.py
 ```
 
-### Generación de Assets
-Si deseas regenerar los assets base del juego:
-```bash
-python src/generate_assets.py
-```
-
 ---
 
 ## 📂 Estructura del Proyecto
@@ -97,8 +91,7 @@ Code-Escape-Factory/
 │   ├── puzzles.py          # Catálogo de desafíos de código
 │   ├── character_selector.py # Pantalla de selección de operario
 │   ├── audio_manager.py    # Gestión de música y efectos de sonido
-│   ├── settings.py         # Configuraciones globales y constantes
-│   └── generate_assets.py  # Script de creación dinámica de assets
+│   └── settings.py         # Configuraciones globales y constantes
 └── README.md
 ```
 
