@@ -1,5 +1,6 @@
 import pygame
-import os
+
+from src.asset_paths import asset_path
 
 class AudioManager:
     def __init__(self):
@@ -20,7 +21,7 @@ class AudioManager:
         pygame.mixer.init()
         # Música de ambiente
         try:
-            ruta_audio = os.path.join("src", "assets", "audio", "ambiente.mp3")
+            ruta_audio = asset_path("audio", "ambiente.mp3")
             pygame.mixer.music.load(ruta_audio)
             pygame.mixer.music.set_volume(0.3)
             pygame.mixer.music.play(-1)
@@ -35,7 +36,7 @@ class AudioManager:
     def _load_sound(self, filename, volume):
         """Helper para cargar sonidos de forma segura."""
         try:
-            path = os.path.join("src", "assets", "audio", filename)
+            path = asset_path("audio", filename)
             sound = pygame.mixer.Sound(path)
             sound.set_volume(volume)
             return sound

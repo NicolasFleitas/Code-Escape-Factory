@@ -1,5 +1,5 @@
 import pygame
-import os
+from src.asset_paths import asset_path
 from src.settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 # Colores
@@ -44,7 +44,7 @@ class CharacterSelector:
     def _cargar_recursos(self):
         """Carga el fondo y los personajes"""
         # Fondo
-        ruta_fondo = os.path.join("src", "assets", "fondo1.jpeg")
+        ruta_fondo = asset_path("fondo1.jpeg")
         self.imagen_fondo = self._cargar_imagen(ruta_fondo, SCREEN_WIDTH, SCREEN_HEIGHT)
         
         # Personajes (preservando nombre exacto de variable)
@@ -57,7 +57,7 @@ class CharacterSelector:
         
         self.lista_personajes_img = []
         for nombre in nombres_archivos:
-            ruta = os.path.join("src", "assets", "personajes", nombre)
+            ruta = asset_path("personajes", nombre)
             self.lista_personajes_img.append(self._cargar_imagen(ruta, 150, 150, alpha=True))
         
         # Nombres de personajes

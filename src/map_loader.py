@@ -17,9 +17,9 @@ from pathlib import Path
 
 import pygame
 
+from src.asset_paths import MAPS_DIR
 from src.settings import TILE_SIZE
 
-MAPS_DIR = Path(__file__).resolve().parent / "assets" / "maps"
 DEFAULT_MAP_PATH = MAPS_DIR / "factory.json"
 
 

@@ -1,8 +1,8 @@
 import math
-import os
 
 import pygame
 
+from src.asset_paths import asset_path
 from src.settings import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -46,9 +46,6 @@ class Player:
 
 
     def load_sprites(self, character_id=1):
-        ruta_base = os.path.dirname(os.path.abspath(__file__))
-        ruta_personajes = os.path.join(ruta_base, "assets", "personajes")
-        
         try:
             # Construir nombres de archivos basados en el character_id
             archivo_frente = f"obrero{character_id}-frente.png"
@@ -56,9 +53,9 @@ class Player:
             archivo_perfil = f"obrero{character_id}-perfil.png"
 
             # Cargar imágenes originales
-            frente = pygame.image.load(os.path.join(ruta_personajes, archivo_frente)).convert_alpha()
-            espalda = pygame.image.load(os.path.join(ruta_personajes, archivo_espalda)).convert_alpha()
-            perfil = pygame.image.load(os.path.join(ruta_personajes, archivo_perfil)).convert_alpha()
+            frente = pygame.image.load(asset_path("personajes", archivo_frente)).convert_alpha()
+            espalda = pygame.image.load(asset_path("personajes", archivo_espalda)).convert_alpha()
+            perfil = pygame.image.load(asset_path("personajes", archivo_perfil)).convert_alpha()
             
             # Escalar al tamaño definido en settings
             self.sprites["frente"] = pygame.transform.scale(frente, (PLAYER_SIZE, PLAYER_SIZE))
