@@ -1,7 +1,7 @@
 # Feature: scene-architecture — refactor de arquitectura de Code Escape: Factory Reset
 
 Objective: ejecutar el roadmap de refactor persistido en Engram (`architecture/game-structure`, obs #615/#622) para que el juego pueda crecer (movimientos, efectos, puzzles) sin que `engine.py` sea un god object.
-Branch: `refactor/scene-architecture`, cada paso del roadmap se entrega como PR con squash merge a `main`.
+Branch: una rama corta por paso (`refactor/scene-architecture` para T1; `refactor/player-delta-time`, `refactor/map-data`, `refactor/puzzle-validators`, `refactor/asset-paths` y `chore/pending-cleanups` para T2–T6), con PR y squash merge a `main`.
 Delivery strategy: `auto-chain` (preferencia persistida del usuario: desarrollador único, auto-merge + branch protection configurados, sin aprobaciones manuales), chain strategy `stacked-to-main`, un paso del roadmap por PR. Test runner: `pytest` + `ruff check .`, headless only.
 
 ## Specs
@@ -26,7 +26,7 @@ S6 — Pendientes menores (del resumen de sesión anterior, verbatim): "bump de 
 | T2 | S2 | inline | done | RED→GREEN pytest 62 passed; ruff clean; smoke headless con Game real (150 px en 0,5 s = 300 px/s); diferencial vs 66cdfb5: bloqueo por ejes idéntico, diagonal ahora normalizada (cambio intencional); PR #28 squash → main ef37d0c |
 | T3 | S3 | inline | done | RED→GREEN pytest 83 passed; ruff clean; render pixel a pixel idéntico vs caa446c sobre 1280x768; smoke headless 7 escenas + puerta; PR #29 squash → main 789bde6 |
 | T4 | S4 | inline | done | RED→GREEN pytest 112 passed; ruff clean; diferencial vs 211ecdf (112 respuestas, 0 regresiones, 6 aceptadas nuevas intencionales); smoke headless 4/4; review nativo aprobado (lineage review-4db4e047002d9690); PR #30 squash → main a3ee6a3 |
-| T5 | S5 | inline | done | RED→GREEN pytest 121 passed; ruff clean; diferencial vs e532044: idéntico desde la raíz del repo, desde cwd ajeno el base perdía fondo de menú y audio; smoke con Game real desde cwd ajeno 7/7 escenas + audio |
+| T5 | S5 | inline | done | RED→GREEN pytest 121 passed; ruff clean; diferencial vs e532044: idéntico desde la raíz del repo, desde cwd ajeno el base perdía fondo de menú y audio; smoke con Game real desde cwd ajeno 7/7 escenas + audio; PR #31 squash → main 6a91f84 |
 | T6 | S6 | inline | done | RED no aplicable (solo eliminación); grep de referencias = 0; pytest 121 passed; ruff clean; smoke headless desde cwd ajeno 7/7 escenas + audio; PR #32 squash → main 09ef9d3 |
 
 Route notes: ningún Writer trigger aplica (cada tarea es una unidad cohesiva única, sin superficies paralelas); el padre trabaja inline siguiendo este documento.
