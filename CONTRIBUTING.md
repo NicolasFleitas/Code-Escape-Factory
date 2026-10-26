@@ -60,7 +60,7 @@ git push origin --delete feat/mi-rama
 
 `-d` falla después de un squash merge porque los commits originales no quedan en el historial de `main`. Si el repositorio tiene activado *Automatically delete head branches*, el borrado remoto es automático y solo queda limpiar la rama local.
 
-Nunca se commitea directo a `main`, salvo una corrección trivial de una línea en documentación.
+Nunca se commitea directo a `main`. La única excepción es una corrección trivial de una línea en documentación; la evidencia de tareas (`odd/tasks/*.md`) no entra en esa excepción.
 
 ## 4. Entorno local
 
@@ -83,6 +83,8 @@ pytest
 ```
 
 Los dos comandos tienen que pasar. Si agregás comportamiento, agregás su test. Si tocás un comando, una opción o un mensaje visible, actualizás la documentación en el mismo PR.
+
+La evidencia del trabajo (`odd/tasks/<feature>.md`) se actualiza en el mismo PR que el cambio: la fila de la tarea registra el estado y las verificaciones, y el PR identifica la entrega. El SHA del squash se consulta en el historial (`git log`), porque no puede escribirse en el mismo commit que lo produce.
 
 ## 6. Reglas de arquitectura
 
