@@ -31,7 +31,7 @@ INTERACTION_DISTANCE = 100
 MAX_DELTA_TIME = 0.05
 
 # --- Lógica de Juego ---
-TIEMPO_LIMITE = 60  # 10 segundos para pruebas
+TIEMPO_LIMITE = 60  # seconds per run
 
 # --- PALETA INDUSTRIAL ---
 MARRON_FABRICA = (110, 70, 45) 

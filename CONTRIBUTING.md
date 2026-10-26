@@ -91,10 +91,10 @@ La evidencia del trabajo (`odd/tasks/<feature>.md`) se actualiza en el mismo PR 
 Estas reglas existen para que el proyecto pueda crecer sin que `engine.py` se coma todo. Aplican a código nuevo y a refactors; no se exige reescribir lo viejo de golpe.
 
 - **`Game` es solo el bucle y el router de escenas.** No es el lugar para lógica de juego, layout de botones ni carga de assets.
-- **Cada estado del juego es una escena** con `handle_event`, `update(dt)` y `draw`.
+- **Cada estado del juego es una escena** en `src/scenes/`, con `handle_event`, `update(dt)` y `draw`.
 - **El estado del juego tiene un único dueño.** No se duplican flags (por ejemplo, si un sonido ya se reprodujo) entre el motor y un manager.
 - **Todo movimiento usa delta time** (`update(dt)`). Nada de píxeles fijos por frame.
-- **Las entidades no leen el teclado.** `Player.update(dt, direccion)` recibe el input; no llama a `pygame.key.get_pressed()`.
+- **Las entidades no leen el teclado.** `Player.update(dt, direction, walls)` recibe el input; no llama a `pygame.key.get_pressed()`.
 - **Datos y render separados.** Mapas y puzzles son datos; los loaders y renderers van aparte.
 - **Un solo módulo de rutas de assets**, resuelto desde `__file__` con `pathlib`. Prohibido `os.path.join("src", "assets", ...)` relativo al directorio de ejecución.
 - **Nada de estado global mutable** importado entre módulos. Si dos módulos necesitan lo mismo, se inyecta.
@@ -103,7 +103,7 @@ Estas reglas existen para que el proyecto pueda crecer sin que `engine.py` se co
 ## 7. Convenciones de código
 
 - Python 3.13, sin dependencias nuevas sin justificarlo en el PR.
-- Identificadores, comentarios y docstrings en inglés. La documentación de usuario (README, esta guía) en español.
+- El código nuevo (identificadores, comentarios y docstrings) va en inglés. El código existente en español se migra solo cuando se toca, no en un barrido masivo. La documentación de usuario (README, esta guía, `DOCUMENTACION_FLUJO.md`) va en español.
 - Nombres de archivos y módulos en `snake_case`.
 - `ruff` es la única fuente de verdad de estilo. No se discute formato en los PRs.
-- Un `print` de diagnóstico no llega a `main`; se usa `logging` o se elimina.
+- Un `print` de diagnóstico no llega a `main`; se usa `logging` o se elimina. Excepción: la carga best-effort de assets y audio reporta el fallo por consola y continúa con un fallback.
